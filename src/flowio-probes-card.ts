@@ -1,7 +1,6 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { available, type Hass } from './model';
 import {
-  PROBE_TONES,
   commonNamePrefix,
   normalizeProbesConfig,
   probeDisplayName,
@@ -13,20 +12,7 @@ import {
   type ProbesConfig
 } from './probes-model';
 
-const COLOR_OPTIONS = [
-  { value: '', label: 'Automatique' },
-  { value: 'water', label: 'Eau · bleu' },
-  { value: 'air', label: 'Air · ambre' },
-  { value: 'ph', label: 'pH · violet' },
-  { value: 'orp', label: 'ORP · cyan' },
-  { value: 'pressure', label: 'Pression · orange' },
-  { value: '__custom', label: 'Personnalisée (YAML)' }
-];
-
-function colorChoice(value?: string): string {
-  if (value === undefined) return '';
-  return (PROBE_TONES as readonly string[]).includes(value) ? value : '__custom';
-}
+const PALETTE = ['#0288d1', '#00acc1', '#26a69a', '#43a047', '#7cb342', '#fbc02d', '#ffa000', '#f4511e', '#e53935', '#d81b60', '#8e24aa', '#5e35b1', '#546e7a', '#9e9e9e'];
 
 class FlowioProbesCard extends LitElement {
   static properties = { hass: { attribute: false }, config: { state: true } };
@@ -50,7 +36,7 @@ class FlowioProbesCard extends LitElement {
     const unit = typeof state?.attributes.unit_of_measurement === 'string' ? state.attributes.unit_of_measurement : '';
     const value = probeValue(state);
     const scale = probeScale(config, id, state);
-    const ratio = scale && value !== undefined ? Math.min(100, Math.max(0, (value - scale.min) / (scale.max - scale.min) * 100)) : undefined;
+    const ratio = value !== undefined ? Math.min(100, Math.max(0, (value - scale.min) / (scale.max - scale.min) * 100)) : 0;
     const text = !state ? 'Entité absente' : !available(state) ? 'Indisponible' : value === undefined ? state.state : `${state.state}${unit ? ` ${unit}` : ''}`;
     const { tone, custom } = resolveProbeColor(config, id, state);
     return html`<div class=probe data-entity=${id} data-tone=${tone} data-available=${available(state) ? 'true' : 'false'} style=${custom ? `--fio-accent:${custom}` : ''}>
@@ -58,7 +44,8 @@ class FlowioProbesCard extends LitElement {
         <span class=probe-name>${label}</span>
         <strong class=probe-value>${text}</strong>
       </button>
-      ${scale ? html`<div class=bar aria-hidden=true><span class=fill style=${`width:${ratio ?? 0}%`}></span></div><div class=limits aria-hidden=true><span>${scale.min}</span><span>${scale.max}</span></div>` : nothing}
+      <div class=bar aria-hidden=true><span class=fill style=${`width:${ratio}%`}></span></div>
+      <div class=limits aria-hidden=true><span>${scale.min}</span><span>${scale.max}</span></div>
     </div>`;
   }
 
@@ -110,27 +97,29 @@ class FlowioProbesCardEditor extends LitElement {
     return this.config && this.hass ? probeIds(this.config, this.hass) : [];
   }
 
+  private commit(config: ProbesConfig) {
+    this.config = config;
+    this.error = '';
+    this.dispatchEvent(new CustomEvent('config-changed', { detail: { config }, bubbles: true, composed: true }));
+  }
+
   private changed(event: CustomEvent) {
     event.stopPropagation();
-    if (!this.config || !this.hass) return;
+    if (!this.config) return;
     try {
       const value = (event.detail?.value ?? {}) as Record<string, unknown>;
-      const ids = this.ids();
-      const colors = { ...this.config.colors };
-      ids.forEach((id, index) => {
-        const choice = value[`probe_${index}`];
-        if (choice === '__custom') return;
-        if (typeof choice === 'string' && choice) colors[id] = choice;
-        else delete colors[id];
-      });
-      const next: Record<string, unknown> = { ...value, colors };
-      for (const key of Object.keys(next)) if (key.startsWith('probe_')) delete next[key];
-      this.config = normalizeProbesConfig(next);
-      this.error = '';
-      this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config }, bubbles: true, composed: true }));
+      this.commit(normalizeProbesConfig({ ...value, colors: this.config.colors }));
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'Configuration invalide';
     }
+  }
+
+  private setColor(id: string, value: string) {
+    if (!this.config) return;
+    const colors = { ...this.config.colors };
+    if (value) colors[id] = value;
+    else delete colors[id];
+    this.commit(normalizeProbesConfig({ ...this.config, colors }));
   }
 
   private options(): { value: string; label: string }[] {
@@ -145,6 +134,18 @@ class FlowioProbesCardEditor extends LitElement {
       });
   }
 
+  private colorRow(id: string, namePrefix: string) {
+    const current = this.config!.colors[id] ?? '';
+    const label = probeDisplayName(rawProbeName(id, this.hass!.states[id]), namePrefix);
+    return html`<div class=color-row>
+      <span class=color-name>${label}</span>
+      <div class=swatches role=group aria-label=${`Couleur de ${label}`}>
+        <button type=button class="swatch auto" data-selected=${current ? 'false' : 'true'} title="Automatique" aria-label=${`Couleur automatique pour ${label}`} @click=${() => this.setColor(id, '')}>Auto</button>
+        ${PALETTE.map(hex => html`<button type=button class=swatch style=${`--swatch:${hex}`} data-selected=${current === hex ? 'true' : 'false'} title=${hex} aria-label=${`Couleur ${hex} pour ${label}`} @click=${() => this.setColor(id, hex)}></button>`)}
+      </div>
+    </div>`;
+  }
+
   render() {
     if (!this.config || !this.hass) return nothing;
     const ids = this.ids();
@@ -156,21 +157,29 @@ class FlowioProbesCardEditor extends LitElement {
       entities: 'Entités ajoutées manuellement',
       name_prefix: 'Préfixe de nom à retirer (vide = automatique)'
     };
-    ids.forEach((id, index) => { labels[`probe_${index}`] = probeDisplayName(rawProbeName(id, this.hass!.states[id]), namePrefix); });
-    const colorFields = ids.map((id, index) => ({ name: `probe_${index}`, selector: { select: { mode: 'dropdown', options: COLOR_OPTIONS } } }));
-    const data = { ...this.config, ...Object.fromEntries(ids.map((id, index) => [`probe_${index}`, colorChoice(this.config!.colors[id])])) };
     const schema = [
       { name: 'title', selector: { text: {} } },
       { name: 'entity_prefix', selector: { text: {} } },
       { name: 'auto', selector: { boolean: {} } },
       { name: 'entities', selector: { select: { multiple: true, mode: 'list', options: this.options() } } },
-      { name: 'name_prefix', selector: { text: {} } },
-      ...colorFields
+      { name: 'name_prefix', selector: { text: {} } }
     ];
-    return html`<p>Les couleurs suivent le modèle Flow.io (Eau, Air, pH, ORP, Pression) et restent modifiables par sonde. Une valeur hexadécimale personnalisée se règle dans <code>colors</code> en YAML.</p>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${data} .schema=${schema} .computeLabel=${(field: { name: string }) => labels[field.name] ?? field.name} @value-changed=${this.changed}></ha-form>`;
+    return html`<p>La couleur « Auto » suit le modèle Flow.io et le thème. Choisir une pastille fixe une couleur propre à la sonde.</p>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${(field: { name: string }) => labels[field.name] ?? field.name} @value-changed=${this.changed}></ha-form>${ids.length ? html`<div class=colors><h4>Couleurs des sondes</h4>${ids.map(id => this.colorRow(id, namePrefix))}</div>` : nothing}`;
   }
 
-  static styles = css`:host{display:block}p{color:var(--secondary-text-color);line-height:1.5}p[role=alert]{color:var(--error-color)}code{font-size:.85em}`;
+  static styles = css`
+    :host{display:block}
+    p{color:var(--secondary-text-color);line-height:1.5}
+    p[role=alert]{color:var(--error-color)}
+    .colors{margin-top:16px}
+    .colors h4{margin:0 0 10px;font-size:.9rem}
+    .color-row{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+    .color-name{font-size:.8rem;font-weight:600}
+    .swatches{display:flex;flex-wrap:wrap;gap:6px}
+    .swatch{width:26px;height:26px;padding:0;border-radius:50%;border:1px solid var(--divider-color);background:var(--swatch);cursor:pointer}
+    .swatch.auto{width:auto;padding:0 10px;border-radius:999px;background:var(--secondary-background-color);font:inherit;font-size:.72rem;color:var(--secondary-text-color)}
+    .swatch[data-selected=true]{outline:2px solid var(--primary-color);outline-offset:2px}
+  `;
 }
 
 if (!customElements.get('flowio-probes-card')) customElements.define('flowio-probes-card', FlowioProbesCard);
@@ -178,5 +187,5 @@ if (!customElements.get('flowio-probes-card-editor')) customElements.define('flo
 const registry = window as Window & { customCards?: Array<Record<string, unknown>> };
 registry.customCards ??= [];
 if (!registry.customCards.some(card => card.type === 'flowio-probes-card')) {
-  registry.customCards.push({ type: 'flowio-probes-card', name: 'Flow.io Sondes', description: 'Sondes dynamiques avec barres de valeur et couleurs Flow.io.', preview: true });
+  registry.customCards.push({ type: 'flowio-probes-card', name: 'Flow.io Sondes', description: 'Sondes dynamiques avec barres de valeur et couleurs personnalisables.', preview: true });
 }

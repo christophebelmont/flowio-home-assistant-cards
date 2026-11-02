@@ -31,6 +31,16 @@ const UNIT_SCALES: Record<string, ProbeScale> = {
   'L': { min: 0, max: 200 }
 };
 
+const ID_SCALES: { suffix: string; scale: ProbeScale }[] = [
+  { suffix: '_io_ph', scale: { min: 6, max: 8 } },
+  { suffix: '_io_orp', scale: { min: 350, max: 900 } },
+  { suffix: '_io_psi', scale: { min: 0, max: 2 } },
+  { suffix: '_io_wat_tmp', scale: { min: 0, max: 40 } },
+  { suffix: '_io_air_tmp', scale: { min: -10, max: 50 } }
+];
+
+const FALLBACK_SCALE: ProbeScale = { min: 0, max: 100 };
+
 function objectValue(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Configuration objet attendue');
   return value as Record<string, unknown>;
@@ -104,7 +114,7 @@ export function probeIds(config: ProbesConfig, hass: Hass | undefined): string[]
   return [...explicit, ...extra];
 }
 
-export function probeScale(config: ProbesConfig, id: string, state?: EntityState): ProbeScale | undefined {
+export function probeScale(config: ProbesConfig, id: string, state?: EntityState): ProbeScale {
   const configured = config.scales[id];
   if (configured) return configured;
   const min = state?.attributes.min;
@@ -112,8 +122,10 @@ export function probeScale(config: ProbesConfig, id: string, state?: EntityState
   if (typeof min === 'number' && typeof max === 'number' && Number.isFinite(min) && Number.isFinite(max) && max > min) {
     return { min, max };
   }
+  const byId = ID_SCALES.find(item => id.endsWith(item.suffix));
+  if (byId) return byId.scale;
   const unit = typeof state?.attributes.unit_of_measurement === 'string' ? state.attributes.unit_of_measurement : '';
-  return UNIT_SCALES[unit];
+  return UNIT_SCALES[unit] ?? FALLBACK_SCALE;
 }
 
 export function probeValue(state?: EntityState): number | undefined {

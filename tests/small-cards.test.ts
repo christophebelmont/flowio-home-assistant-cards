@@ -79,7 +79,9 @@ it('calcule les échelles et valeurs des sondes', () => {
   const config = normalizeProbesConfig({ scales: { 'sensor.fio_data_112': { min: 0, max: 50 } } });
   expect(probeScale(config, 'sensor.fio_data_112', state('12', {}))).toEqual({ min: 0, max: 50 });
   expect(probeScale(config, 'sensor.fio_data_130', state('82', { unit_of_measurement: '%' }))).toEqual({ min: 0, max: 100 });
-  expect(probeScale(config, 'sensor.fio_unknown', state('1', {}))).toBeUndefined();
+  expect(probeScale(config, 'sensor.fio_io_ph', state('7.2', {}))).toEqual({ min: 6, max: 8 });
+  expect(probeScale(config, 'sensor.fio_io_psi', state('0.9', { unit_of_measurement: 'bar' }))).toEqual({ min: 0, max: 2 });
+  expect(probeScale(config, 'sensor.fio_unknown', state('1', {}))).toEqual({ min: 0, max: 100 });
   expect(probeValue(state('12.6', {}))).toBe(12.6);
   expect(probeValue(state('unavailable', {}))).toBeUndefined();
 });
