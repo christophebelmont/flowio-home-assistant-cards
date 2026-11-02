@@ -1,5 +1,11 @@
 import './flowio-header-card';
 import './flowio-filtration-card';
 import './flowio-treatment-card';
+import './flowio-equipment-card';
+import './flowio-modes-card';
+import './flowio-probes-card';
+import './flowio-alarms-card';
+import './flowio-status-card';
+import './flowio-override-card';
 import './flowio-pool-card';
 import './flowio-history-card';

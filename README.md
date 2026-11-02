@@ -15,6 +15,12 @@ Cartes de supervision et de pilotage pour les entités MQTT du firmware Flow.io-
 - `custom:flowio-header-card` : bandeau compact « état du bassin » avec le statut, une phrase de contexte et les jauges Eau · ORP · Air.
 - `custom:flowio-filtration-card` : plage de filtration calculée (frise, début, fin, durée prévue).
 - `custom:flowio-treatment-card` : informations du traitement actif, adaptées au type configuré (chlore/brome, électrolyse, oxygène actif, désactivé).
+- `custom:flowio-equipment-card` : marche/arrêt des équipements sélectionnés.
+- `custom:flowio-modes-card` : modes manuel, automatique et hivernage sélectionnés.
+- `custom:flowio-probes-card` : sondes avec barres de valeur, dont les sondes `data_*` découvertes automatiquement.
+- `custom:flowio-alarms-card` : synthèse des alarmes surveillées et liste des alarmes actives.
+- `custom:flowio-status-card` : informations système du contrôleur (IP, mémoire, temps de fonctionnement, tension, courant).
+- `custom:flowio-override-card` : forçage d’un équipement en marche/arrêt pendant une durée choisie.
 - `custom:flowio-pool-card` : jauges pH/ORP/pression, températures, équipements, modes, alarmes, cuves et frise de filtration.
 - `custom:flowio-history-card` : courbes ApexCharts alimentées par l'historique Home Assistant/Recorder.
 
@@ -98,6 +104,74 @@ entity_prefix: fio
 ```
 
 La carte lit le type de traitement depuis `select.<préfixe>_pl_modes_dis` et affiche uniquement les informations du traitement actif ; elle ne permet pas de le modifier. Chlore/Brome : `switch.<préfixe>_pl_dis_auto`, `number.<préfixe>_pl_dis_setpoint`, `number.<préfixe>_pl_dis_window`. Électrolyse : `select.<préfixe>_pl_swg_ctrl`, `number.<préfixe>_pl_swg_dly_elec`, `number.<préfixe>_pl_swg_min_temp`. Oxygène actif : `number.<préfixe>_pl_o2_vol`, `number.<préfixe>_pl_o2_dose`, `number.<préfixe>_pl_o2_split`, `sensor.<préfixe>_pl_o2_pending`. Une entité absente est signalée explicitement, jamais remplacée par zéro.
+
+## Équipements
+
+```yaml
+type: custom:flowio-equipment-card
+title: Équipements
+entity_prefix: fio
+entities: [filtration, ph_pump, disinfection_pump, heater, robot, lighting, filling]
+```
+
+Chaque équipement affiche son état et un interrupteur. La pompe désinfectant cible l’électrolyseur en mode firmware « Electrolyse », sinon la pompe désinfectant. Les démarrages sensibles demandent confirmation. Masquer un équipement ne désactive pas sa surveillance dans Flow.io.
+
+## Modes
+
+```yaml
+type: custom:flowio-modes-card
+entity_prefix: fio
+modes: [filtration_auto, winter, ph_auto, disinfection_auto, heater_auto, disinfection_type, swg_control, ph_dose_plus, o2_temp_comp]
+```
+
+Reprend les modes manuel/automatique et l’hivernage, avec les réglages avancés de stratégie de traitement. Les modifications peuvent changer le pilotage automatique ; les sécurités restent dans Flow.io.
+
+## Sondes
+
+```yaml
+type: custom:flowio-probes-card
+title: Sondes
+entity_prefix: fio
+auto: true
+entities: [sensor.fio_io_wat_tmp, sensor.fio_io_air_tmp, sensor.fio_io_orp, sensor.fio_io_psi]
+scales:
+  sensor.fio_io_wat_tmp: { min: 0, max: 40 }
+```
+
+La liste est dynamique : avec `auto: true`, toute sonde `sensor.<préfixe>_data_*` découverte par Home Assistant apparaît automatiquement, sans reconfiguration. `entities` ajoute des entités explicites. Les barres utilisent `scales` si défini, sinon les bornes `min`/`max` de l’entité, sinon une échelle par défaut selon l’unité. Une entité absente est signalée explicitement.
+
+## Alarmes
+
+```yaml
+type: custom:flowio-alarms-card
+title: Alarmes
+entity_prefix: fio
+```
+
+Synthèse des alarmes surveillées (`binary_sensor.<préfixe>_alm_*_active`) : nombre total et état, puis liste des alarmes actives. Aucune alarme n’est acquittée par cette carte.
+
+## État système
+
+```yaml
+type: custom:flowio-status-card
+title: État système
+entity_prefix: fio
+items: [wifi_ip, sys_hp_free, sys_upt_mn]
+```
+
+Informations réseau et système du contrôleur : adresse IP/MAC, signal Wi-Fi, temps de fonctionnement, mémoire libre/minimale/fragmentée, tension et courant. Le temps de fonctionnement est converti en jours, heures ou minutes.
+
+## Forçage
+
+```yaml
+type: custom:flowio-override-card
+title: Forçage temporaire
+entity_prefix: fio
+device: Filtration
+durations: [5, 15, 30, 60]
+```
+
+Force l’équipement choisi en marche ou à l’arrêt pendant une durée sélectionnée (5, 15, 30, 60 min), puis termine le forçage. L’équipement se choisit dans la liste publiée par Flow.io (`select.<préfixe>_pdm_ovr_target`) ; les durées sont modifiables. Les commandes demandent confirmation et Flow.io reste responsable des sécurités.
 
 ## Historiques
 
