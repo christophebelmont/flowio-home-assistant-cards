@@ -2,12 +2,15 @@ import { MEASUREMENTS, normalizePrefix, type Measurement } from './entities';
 import { available, type Hass } from './model';
 import { modeId } from './modes-model';
 
+export type HeaderDesign = 'standard' | 'flowio';
+
 export interface HeaderConfig {
   type: string;
   title: string;
   entity_prefix: string;
   measurements: Measurement[];
   status: boolean;
+  design: HeaderDesign;
   grid_options?: Record<string, unknown>;
 }
 
@@ -57,6 +60,8 @@ export function normalizeHeaderConfig(input: unknown): HeaderConfig {
       supplied.some(value => typeof value !== 'string' || !(MEASUREMENTS as readonly string[]).includes(value))) {
     throw new Error('Choisir les mesures métier proposées');
   }
+  const design = raw.design ?? 'standard';
+  if (design !== 'standard' && design !== 'flowio') throw new Error('Design attendu : standard ou flowio');
   const grid_options = raw.grid_options === undefined ? undefined : raw.grid_options;
   if (grid_options !== undefined && (!grid_options || typeof grid_options !== 'object' || Array.isArray(grid_options))) {
     throw new Error('grid_options doit être un objet');
@@ -67,6 +72,7 @@ export function normalizeHeaderConfig(input: unknown): HeaderConfig {
     entity_prefix: normalizePrefix(raw.entity_prefix),
     measurements: [...new Set(supplied)] as Measurement[],
     status,
+    design,
     ...(grid_options ? { grid_options: grid_options as Record<string, unknown> } : {})
   };
 }

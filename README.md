@@ -13,6 +13,8 @@ Cartes de supervision et de pilotage pour les entités MQTT du firmware Flow.io-
 ## Cartes
 
 - `custom:flowio-header-card` : bandeau compact « état du bassin » avec le statut, une phrase de contexte et les jauges Eau · ORP · Air.
+- `custom:flowio-filtration-card` : plage de filtration calculée (frise, début, fin, durée prévue).
+- `custom:flowio-treatment-card` : informations du traitement actif, adaptées au type configuré (chlore/brome, électrolyse, oxygène actif, désactivé).
 - `custom:flowio-pool-card` : jauges pH/ORP/pression, températures, équipements, modes, alarmes, cuves et frise de filtration.
 - `custom:flowio-history-card` : courbes ApexCharts alimentées par l'historique Home Assistant/Recorder.
 
@@ -69,13 +71,33 @@ Pour compatibilité, l’ancien champ `display.treatment` n’empêche pas le ch
 type: custom:flowio-header-card
 title: État du bassin
 entity_prefix: fio
+design: standard
 measurements: [water_temperature, orp, air_temperature]
 status: true
 grid_options:
   columns: full
 ```
 
-Le statut vient des alarmes firmware (`sensor.<préfixe>_alm_active_count` et `binary_sensor.<préfixe>_alm_any_active`) : « État normal » ou « Alarme en cours ». La phrase de contexte suit le mode de filtration (`switch.<préfixe>_pl_modes_auto`) et le type de traitement (`select.<préfixe>_pl_modes_dis`). Les jauges reprennent les échelles de `flowio-pool-card` et le thème Home Assistant ; `status: false` masque le bandeau de statut. Cette carte est autonome : elle ne modifie pas la carte piscine.
+Le statut vient des alarmes firmware (`sensor.<préfixe>_alm_active_count` et `binary_sensor.<préfixe>_alm_any_active`) : « État normal » ou « Alarme en cours ». La phrase de contexte suit le mode de filtration (`switch.<préfixe>_pl_modes_auto`) et le type de traitement (`select.<préfixe>_pl_modes_dis`). Les jauges reprennent les échelles de `flowio-pool-card` et le thème Home Assistant ; `status: false` masque le bandeau de statut. `design` vaut `standard` (thème Home Assistant) ou `flowio` (fond dégradé bleu avec vague en bas et jauges cyan/vert/orange) ; sur mobile, les jauges sont centrées horizontalement. Cette carte est autonome : elle ne modifie pas la carte piscine.
+
+## Filtration
+
+```yaml
+type: custom:flowio-filtration-card
+title: Filtration
+entity_prefix: fio
+```
+
+La carte affiche la plage de filtration calculée par Flow.io depuis `sensor.<préfixe>_pl_flt_start` et `sensor.<préfixe>_pl_flt_stop` : frise sur 24 h, repère de l’heure courante, début, fin et durée prévue. C’est une fenêtre prévue, distincte des compteurs journaliers. `title` et `description` sont personnalisables.
+
+## Traitement
+
+```yaml
+type: custom:flowio-treatment-card
+entity_prefix: fio
+```
+
+La carte lit le type de traitement depuis `select.<préfixe>_pl_modes_dis` et affiche uniquement les informations du traitement actif ; elle ne permet pas de le modifier. Chlore/Brome : `switch.<préfixe>_pl_dis_auto`, `number.<préfixe>_pl_dis_setpoint`, `number.<préfixe>_pl_dis_window`. Électrolyse : `select.<préfixe>_pl_swg_ctrl`, `number.<préfixe>_pl_swg_dly_elec`, `number.<préfixe>_pl_swg_min_temp`. Oxygène actif : `number.<préfixe>_pl_o2_vol`, `number.<préfixe>_pl_o2_dose`, `number.<préfixe>_pl_o2_split`, `sensor.<préfixe>_pl_o2_pending`. Une entité absente est signalée explicitement, jamais remplacée par zéro.
 
 ## Historiques
 

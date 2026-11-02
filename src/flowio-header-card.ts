@@ -65,7 +65,8 @@ class FlowioHeaderCard extends LitElement {
     if (!config || !hass) return html`<ha-card><div class=body>En attente de Home Assistant…</div></ha-card>`;
     const status = poolStatus(hass, config.entity_prefix);
     const description = statusDescription(hass, config.entity_prefix);
-    return html`<ha-card>
+    return html`<ha-card class=${config.design === 'flowio' ? 'flowio' : ''}>
+      ${config.design === 'flowio' ? html`<svg class=wave viewBox="0 0 1200 90" preserveAspectRatio=none aria-hidden=true><path d="M0,55 C150,90 350,10 600,45 C850,80 1050,20 1200,50 L1200,90 L0,90 Z"></path><path d="M0,70 C200,40 400,95 600,65 C800,35 1000,85 1200,60 L1200,90 L0,90 Z"></path></svg>` : nothing}
       <div class=body>
         ${config.status ? html`<div class=status data-tone=${status.tone}>
           <span class=eyebrow>${config.title}</span>
@@ -81,8 +82,8 @@ class FlowioHeaderCard extends LitElement {
   }
 
   static styles = css`
-    :host{display:block;color:var(--primary-text-color);font-family:var(--ha-font-family-body,inherit);--fio-water:var(--flowio-water-color,var(--blue-color,var(--primary-color)));--fio-air:var(--flowio-air-color,var(--amber-color,var(--accent-color,var(--primary-color))));--fio-ph:var(--flowio-ph-color,var(--purple-color,var(--accent-color,var(--primary-color))));--fio-orp:var(--flowio-orp-color,var(--cyan-color,var(--info-color,var(--primary-color))));--fio-pressure:var(--flowio-pressure-color,var(--orange-color,var(--accent-color,var(--primary-color))))}
-    ha-card{overflow:hidden}
+    :host{display:block;container-type:inline-size;color:var(--primary-text-color);font-family:var(--ha-font-family-body,inherit);--fio-water:var(--flowio-water-color,var(--blue-color,var(--primary-color)));--fio-air:var(--flowio-air-color,var(--amber-color,var(--accent-color,var(--primary-color))));--fio-ph:var(--flowio-ph-color,var(--purple-color,var(--accent-color,var(--primary-color))));--fio-orp:var(--flowio-orp-color,var(--cyan-color,var(--info-color,var(--primary-color))));--fio-pressure:var(--flowio-pressure-color,var(--orange-color,var(--accent-color,var(--primary-color))))}
+    ha-card{position:relative;overflow:hidden}
     .body{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;padding:16px}
     .status{flex:1 1 240px;min-width:0}
     .eyebrow{display:block;font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--secondary-text-color)}
@@ -109,6 +110,26 @@ class FlowioHeaderCard extends LitElement {
     .gauge[data-tone=ph]{--fio-accent:var(--fio-ph)}
     .gauge[data-tone=orp]{--fio-accent:var(--fio-orp)}
     .gauge[data-tone=pressure]{--fio-accent:var(--fio-pressure)}
+    .wave{position:absolute;left:0;right:0;bottom:0;width:100%;height:64px;display:block;pointer-events:none}
+    .wave path{fill:rgba(255,255,255,.07)}
+    .wave path:last-child{fill:rgba(255,255,255,.10)}
+    ha-card.flowio{background:linear-gradient(120deg,#0b3f6b,#0a3055 55%,#082a49);border:0;color:#fff}
+    ha-card.flowio .eyebrow{color:#8fd3f4}
+    ha-card.flowio .status-icon{color:#5fd0e0}
+    ha-card.flowio .status[data-tone=ok] .status-icon{color:#5fd0e0}
+    ha-card.flowio .status[data-tone=alert] .status-icon{color:#ffb4ab}
+    ha-card.flowio .status-title{color:#fff}
+    ha-card.flowio .status-description{color:rgba(255,255,255,.82)}
+    ha-card.flowio .track{stroke:rgba(255,255,255,.16);opacity:1}
+    ha-card.flowio .reading strong{color:#fff}
+    ha-card.flowio .reading small{color:rgba(255,255,255,.75)}
+    ha-card.flowio .caption{color:rgba(255,255,255,.88);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+    ha-card.flowio .gauge[data-tone=water]{--fio-accent:#38d0e8}
+    ha-card.flowio .gauge[data-tone=orp]{--fio-accent:#34d399}
+    ha-card.flowio .gauge[data-tone=air]{--fio-accent:#fbbf24}
+    ha-card.flowio .gauge[data-tone=ph]{--fio-accent:#c084fc}
+    ha-card.flowio .gauge[data-tone=pressure]{--fio-accent:#fb923c}
+    @container(max-width:620px){.body{justify-content:center}.status{flex-basis:100%}.gauges{width:100%;justify-content:center;margin-inline-start:0}}
     @media (prefers-reduced-motion: reduce){.progress{transition:none}}
   `;
 }
@@ -137,12 +158,14 @@ class FlowioHeaderCardEditor extends LitElement {
     const schema = [
       { name: 'title', selector: { text: {} } },
       { name: 'entity_prefix', selector: { text: {} } },
+      { name: 'design', selector: { select: { mode: 'dropdown', options: [{ value: 'standard', label: 'Standard' }, { value: 'flowio', label: 'Flow.io' }] } } },
       { name: 'status', selector: { boolean: {} } },
       { name: 'measurements', selector: { select: { multiple: true, mode: 'list', options: MEASUREMENTS.map(value => ({ value, label: gaugeLabel(value) })) } } }
     ];
     const labels: Record<string, string> = {
       title: 'Libellé',
       entity_prefix: 'Préfixe firmware',
+      design: 'Design',
       status: 'Afficher l’état du bassin',
       measurements: 'Jauges affichées'
     };

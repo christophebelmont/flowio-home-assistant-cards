@@ -27,6 +27,12 @@ it('rejette les mesures et options invalides', () => {
   }
 });
 
+it('choisit le design standard par défaut et accepte le design Flow.io', () => {
+  expect(normalizeHeaderConfig({}).design).toBe('standard');
+  expect(normalizeHeaderConfig({ design: 'flowio' }).design).toBe('flowio');
+  expect(() => normalizeHeaderConfig({ design: 'autre' })).toThrow();
+});
+
 it('conserve grid_options pour les vues Sections', () => {
   expect(normalizeHeaderConfig({ grid_options: { columns: 'full' } }).grid_options).toEqual({ columns: 'full' });
 });
