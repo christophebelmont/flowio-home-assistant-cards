@@ -3,7 +3,7 @@ import { roleLabel } from './entities';
 import { ensureHaElements } from './ha-controls';
 import { available, type Hass } from './model';
 import { treatmentFromFirmware, type Treatment } from './modes-model';
-import { iconFor, toneFor } from './visual';
+import { iconFor } from './visual';
 import {
   EQUIPMENT_ROLES,
   canToggleEquipment,
@@ -67,7 +67,7 @@ class FlowioEquipmentCard extends LitElement {
     const enabled = canToggleEquipment(hass, config.entity_prefix, role, treatment);
     const status = !state ? 'Entité absente' : !available(state) ? 'Indisponible' : on ? 'En marche' : state.state === 'off' ? 'Arrêté' : 'État non commandable';
     const action = `${on ? 'Arrêter' : 'Démarrer'} ${label}`;
-    return html`<div class=row data-equipment=${role} data-tone=${toneFor(role)} data-on=${on ? 'true' : 'false'} data-available=${available(state) ? 'true' : 'false'}>
+    return html`<div class=row data-equipment=${role} data-on=${on ? 'true' : 'false'} data-available=${available(state) ? 'true' : 'false'}>
       <button type=button class=info ?disabled=${!state} @click=${() => this.more(id)}>
         <span class=icon-plate><ha-icon .icon=${iconFor(role)} aria-hidden=true></ha-icon></span>
         <span class=copy><span class=name>${label}</span><span class=state>${status}</span></span>
@@ -89,26 +89,21 @@ class FlowioEquipmentCard extends LitElement {
   }
 
   static styles = css`
-    :host{display:block;container-type:inline-size;color:var(--primary-text-color);font-family:var(--ha-font-family-body,inherit);--fio-accent:var(--primary-color);--fio-water:var(--flowio-water-color,var(--blue-color,var(--primary-color)));--fio-air:var(--flowio-air-color,var(--amber-color,var(--accent-color,var(--primary-color))));--fio-ph:var(--flowio-ph-color,var(--purple-color,var(--accent-color,var(--primary-color))));--fio-orp:var(--flowio-orp-color,var(--cyan-color,var(--info-color,var(--primary-color))));--fio-pressure:var(--flowio-pressure-color,var(--orange-color,var(--accent-color,var(--primary-color))))}
+    :host{display:block;container-type:inline-size;color:var(--primary-text-color);font-family:var(--ha-font-family-body,inherit)}
     ha-card{overflow:hidden}
     .body{padding:16px}
     .title{margin:0 0 12px;font-size:1.05rem;font-weight:650;line-height:1.25}
     .error{margin:0 0 10px;color:var(--error-color);font-size:.78rem}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
     .row{display:flex;align-items:center;gap:10px;min-width:0;padding:8px 12px;border:1px solid var(--divider-color);border-radius:14px;background:transparent}
-    .row[data-on=true]{border-color:var(--fio-accent);background:color-mix(in srgb,var(--fio-accent) 8%,transparent)}
+    .row[data-on=true]{border-color:var(--success-color,#2e7d32);background:color-mix(in srgb,var(--success-color,#2e7d32) 10%,transparent)}
     .info{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:10px;padding:0;border:0;background:none;text-align:left;font:inherit;color:inherit;cursor:pointer;min-height:44px}
     .info:disabled{cursor:default}
-    .icon-plate{display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;height:36px;border-radius:10px;color:var(--fio-accent);background:color-mix(in srgb,var(--fio-accent) 18%,var(--ha-card-background,var(--card-background-color)))}
+    .icon-plate{display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;height:36px;border-radius:10px;color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 14%,var(--ha-card-background,var(--card-background-color)))}
     .icon-plate ha-icon{--mdc-icon-size:20px}
     .copy{display:flex;flex-direction:column;gap:2px;min-width:0}
     .name{font-size:.86rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
     .state{font-size:.72rem;color:var(--secondary-text-color)}
-    .row[data-tone=water]{--fio-accent:var(--fio-water)}
-    .row[data-tone=air]{--fio-accent:var(--fio-air)}
-    .row[data-tone=ph]{--fio-accent:var(--fio-ph)}
-    .row[data-tone=orp]{--fio-accent:var(--fio-orp)}
-    .row[data-tone=pressure]{--fio-accent:var(--fio-pressure)}
     @container(max-width:420px){.grid{grid-template-columns:minmax(0,1fr)}}
   `;
 }

@@ -21,6 +21,7 @@ Cartes de supervision et de pilotage pour les entités MQTT du firmware Flow.io-
 - `custom:flowio-alarms-card` : synthèse des alarmes surveillées et liste des alarmes actives.
 - `custom:flowio-status-card` : informations système du contrôleur (IP, mémoire, temps de fonctionnement, tension, courant).
 - `custom:flowio-override-card` : forçage d’un équipement en marche/arrêt pendant une durée choisie.
+- `custom:flowio-graph-card` : un seul graphique ApexCharts (courbe ou barres) pour les entités choisies, avec couleur par entité.
 - `custom:flowio-pool-card` : jauges pH/ORP/pression, températures, équipements, modes, alarmes, cuves et frise de filtration.
 - `custom:flowio-history-card` : courbes ApexCharts alimentées par l'historique Home Assistant/Recorder.
 
@@ -120,11 +121,12 @@ Chaque équipement affiche son état et un interrupteur. La pompe désinfectant 
 
 ```yaml
 type: custom:flowio-modes-card
+title: Modes
 entity_prefix: fio
-modes: [filtration_auto, winter, ph_auto, disinfection_auto, heater_auto, disinfection_type, swg_control, ph_dose_plus, o2_temp_comp]
+modes: [filtration_auto, winter, ph_auto, disinfection_auto, heater_auto, ph_dose_plus, o2_temp_comp]
 ```
 
-Reprend les modes manuel/automatique et l’hivernage, avec les réglages avancés de stratégie de traitement. Les modifications peuvent changer le pilotage automatique ; les sécurités restent dans Flow.io.
+Tuiles sur le modèle de la carte Équipements : icône, nom, état et interrupteur. Un mode actif surligne la tuile en bleu ; le titre est configurable et sans icône. Seuls les modes à interrupteur sont proposés (les sélecteurs de traitement sont couverts par la carte Traitement). Les modifications peuvent changer le pilotage automatique ; les sécurités restent dans Flow.io.
 
 ## Sondes
 
@@ -175,6 +177,21 @@ durations: [5, 15, 30, 60]
 ```
 
 Force l’équipement choisi en marche ou à l’arrêt pendant une durée sélectionnée (5, 15, 30, 60 min), puis termine le forçage. L’équipement se choisit dans la liste publiée par Flow.io (`select.<préfixe>_pdm_ovr_target`) ; les durées sont modifiables. Les commandes demandent confirmation et Flow.io reste responsable des sécurités.
+
+## Graphique
+
+```yaml
+type: custom:flowio-graph-card
+title: Température de l’eau
+entity_prefix: fio
+entities: [sensor.fio_io_wat_tmp]
+hours_to_show: 12
+chart_type: line
+colors:
+  sensor.fio_io_wat_tmp: '#0288d1'
+```
+
+Un seul graphique ApexCharts, en courbe (`line`) ou en barres (`bar`). `entities` liste les séries (l’éditeur propose toutes les entités du préfixe) ; chaque série peut recevoir une couleur via `colors` (choix par pastilles dans l’éditeur, ou code CSS). La couleur n’est portée que par le graphique : en-tête et pied restent au thème. `hours_to_show` vaut 12 h par défaut (1–168). Avec une seule entité, l’en-tête affiche son nom, son unité et la valeur actuelle, et le pied le minimum, la moyenne des échantillons et le maximum. Les données proviennent du Recorder ; aucune valeur indisponible n’est remplacée par zéro.
 
 ## Historiques
 
