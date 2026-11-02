@@ -1,11 +1,6 @@
 import { expect, it } from 'vitest';
 import type { Hass } from '../src/model';
-import {
-  canToggleEquipment,
-  equipmentEntityId,
-  equipmentLabel,
-  normalizeEquipmentConfig
-} from '../src/equipment-model';
+import { normalizeTileGridConfig } from '../src/tile-grid';
 import { commonNamePrefix, discoveredProbeIds, normalizeProbesConfig, probeDisplayName, probeIds, probeScale, probeTone, probeValue, resolveProbeColor } from '../src/probes-model';
 import { formatUptime, normalizeStatusConfig, statusBindings, statusValue } from '../src/status-model';
 import { normalizeOverrideConfig, overrideAvailable, overrideForced, overrideRemainingMinutes } from '../src/override-model';
@@ -14,23 +9,18 @@ import { alarmEntries, alarmSummary, normalizeAlarmsConfig } from '../src/alarms
 const state = (value: string, attributes: Record<string, unknown> = {}) => ({ state: value, attributes });
 const hass = (states: Record<string, ReturnType<typeof state>>): Hass => ({ states, callService: async () => undefined });
 
-it('configure la carte équipements', () => {
-  const config = normalizeEquipmentConfig({});
+it('configure une grille de tuiles (nom, colonnes, entités)', () => {
+  const config = normalizeTileGridConfig({}, 'custom:test', 'Équipements');
   expect(config.title).toBe('Équipements');
-  expect(config.entities).toContain('filtration');
-  expect(normalizeEquipmentConfig({ entities: ['lighting', 'lighting'] }).entities).toEqual(['lighting']);
-  expect(() => normalizeEquipmentConfig({ entities: ['ph'] })).toThrow();
-});
-
-it('route la pompe désinfectant vers l’électrolyseur', () => {
-  expect(equipmentEntityId('fio', 'disinfection_pump', 'electrolyzer')).toBe('switch.fio_io_chl_gen');
-  expect(equipmentEntityId('fio', 'disinfection_pump', 'chlorine_bromine')).toBe('switch.fio_io_chl_pmp');
-  expect(equipmentLabel('disinfection_pump', 'electrolyzer')).toBe('Électrolyseur');
-  const h = hass({ 'switch.fio_io_chl_gen': state('off'), 'switch.fio_io_flt_pmp': state('on') });
-  expect(canToggleEquipment(h, 'fio', 'disinfection_pump', 'electrolyzer')).toBe(true);
-  expect(canToggleEquipment(h, 'fio', 'disinfection_pump', 'disabled')).toBe(false);
-  expect(canToggleEquipment(h, 'fio', 'filtration')).toBe(true);
-  expect(canToggleEquipment(h, 'fio', 'robot')).toBe(false);
+  expect(config.columns).toBe(2);
+  expect(config.entities).toEqual([]);
+  const custom = normalizeTileGridConfig({ title: 'Relais', columns: 3, entities: ['switch.a', 'switch.a', 'switch.b'] }, 'custom:test', 'X');
+  expect(custom.title).toBe('Relais');
+  expect(custom.columns).toBe(3);
+  expect(custom.entities).toEqual(['switch.a', 'switch.b']);
+  for (const input of [{ columns: 0 }, { columns: 7 }, { columns: 1.5 }, { entities: 'switch.a' }, { entities: [''] }, { title: '' }, { grid_options: [] }]) {
+    expect(() => normalizeTileGridConfig(input, 'custom:test', 'X')).toThrow();
+  }
 });
 
 it('configure la carte sondes', () => {

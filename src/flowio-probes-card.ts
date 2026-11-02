@@ -78,8 +78,8 @@ class FlowioProbesCard extends LitElement {
     .probe-head:disabled{cursor:default}
     .probe-name{font-size:.86rem;font-weight:600;line-height:1.3}
     .probe-value{font-size:.9rem;font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
-    .bar{position:relative;height:9px;margin-top:8px;border-radius:999px;background:transparent;box-shadow:inset 0 0 0 1px var(--divider-color);overflow:hidden}
-    .fill{display:block;height:100%;border-radius:999px;background:var(--fio-accent);transition:width .2s ease}
+    .bar{position:relative;height:12px;margin-top:8px;border-radius:999px;background:var(--secondary-background-color);overflow:hidden}
+    .fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--fio-accent),color-mix(in srgb,var(--fio-accent) 45%,var(--ha-card-background,var(--card-background-color))));transition:width .2s ease}
     .limits{display:flex;justify-content:space-between;margin-top:5px;font-size:.62rem;color:var(--secondary-text-color);font-variant-numeric:tabular-nums}
     @media (prefers-reduced-motion: reduce){.fill{transition:none}}
   `;

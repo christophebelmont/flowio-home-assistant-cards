@@ -15,8 +15,8 @@ Cartes de supervision et de pilotage pour les entités MQTT du firmware Flow.io-
 - `custom:flowio-header-card` : bandeau compact « état du bassin » avec le statut, une phrase de contexte et les jauges Eau · ORP · Air.
 - `custom:flowio-filtration-card` : plage de filtration calculée (frise, début, fin, durée prévue).
 - `custom:flowio-treatment-card` : informations du traitement actif, adaptées au type configuré (chlore/brome, électrolyse, oxygène actif, désactivé).
-- `custom:flowio-equipment-card` : marche/arrêt des équipements sélectionnés.
-- `custom:flowio-modes-card` : modes manuel, automatique et hivernage sélectionnés.
+- `custom:flowio-equipment-card` : grille de tuiles pour les équipements sélectionnés (bascule par l’icône).
+- `custom:flowio-modes-card` : grille de tuiles pour les modes manuel, automatique et hivernage.
 - `custom:flowio-probes-card` : sondes avec barres de valeur, dont les sondes `data_*` découvertes automatiquement.
 - `custom:flowio-alarms-card` : synthèse des alarmes surveillées et liste des alarmes actives.
 - `custom:flowio-status-card` : informations système du contrôleur (IP, mémoire, temps de fonctionnement, tension, courant).
@@ -112,10 +112,11 @@ La carte lit le type de traitement depuis `select.<préfixe>_pl_modes_dis` et af
 type: custom:flowio-equipment-card
 title: Équipements
 entity_prefix: fio
-entities: [filtration, ph_pump, disinfection_pump, heater, robot, lighting, filling]
+columns: 2
+entities: [switch.fio_io_flt_pmp, switch.fio_io_ph_pmp, switch.fio_io_chl_pmp]
 ```
 
-Chaque équipement affiche son état et un interrupteur. La pompe désinfectant cible l’électrolyseur en mode firmware « Electrolyse », sinon la pompe désinfectant. Les démarrages sensibles demandent confirmation. Masquer un équipement ne désactive pas sa surveillance dans Flow.io.
+Carte encadrée contenant une grille de tuiles standard Home Assistant. Le nom, le nombre de colonnes (1–6) et la liste des entités se règlent dans l’éditeur. Cliquer sur l’icône bascule l’entité ; cliquer ailleurs ouvre l’entité. Les couleurs suivent l’état (tuile standard). Les démarrages sensibles et les sécurités restent gérés par Flow.io.
 
 ## Modes
 
@@ -123,10 +124,11 @@ Chaque équipement affiche son état et un interrupteur. La pompe désinfectant 
 type: custom:flowio-modes-card
 title: Modes
 entity_prefix: fio
-modes: [filtration_auto, winter, ph_auto, disinfection_auto, heater_auto, ph_dose_plus, o2_temp_comp]
+columns: 2
+entities: [switch.fio_pl_modes_auto, switch.fio_pl_modes_winter, switch.fio_pl_ph_auto_mode]
 ```
 
-Tuiles sur le modèle de la carte Équipements : icône, nom, état et interrupteur. Un mode actif surligne la tuile en bleu ; le titre est configurable et sans icône. Seuls les modes à interrupteur sont proposés (les sélecteurs de traitement sont couverts par la carte Traitement). Les modifications peuvent changer le pilotage automatique ; les sécurités restent dans Flow.io.
+Même modèle que la carte Équipements : grille de tuiles standard, nom, colonnes et entités configurables. Cliquer sur l’icône bascule le mode ; cliquer ailleurs ouvre l’entité. Les modifications peuvent changer le pilotage automatique ; les sécurités restent dans Flow.io.
 
 ## Sondes
 
