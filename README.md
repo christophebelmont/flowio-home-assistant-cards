@@ -12,6 +12,7 @@ Cartes de supervision et de pilotage pour les entités MQTT du firmware Flow.io-
 
 ## Cartes
 
+- `custom:flowio-header-card` : bandeau compact « état du bassin » avec le statut, une phrase de contexte et les jauges Eau · ORP · Air.
 - `custom:flowio-pool-card` : jauges pH/ORP/pression, températures, équipements, modes, alarmes, cuves et frise de filtration.
 - `custom:flowio-history-card` : courbes ApexCharts alimentées par l'historique Home Assistant/Recorder.
 
@@ -61,6 +62,20 @@ Le préfixe vaut `fio` par défaut : `piscine` construit `sensor.piscine_io_ph`.
 Les anciens champs `entities`, `features`, `show_tanks`, `treatment` et `measurements` au premier niveau de la synthèse sont rejetés. Recréer les anciennes configurations avec `display`. Pour les historiques, `measurements` reste au premier niveau.
 
 Pour compatibilité, l’ancien champ `display.treatment` n’empêche pas le chargement d’une carte, mais n’a plus d’effet ; le mode actif vient de `select.<préfixe>_pl_modes_dis`.
+
+## Entête
+
+```yaml
+type: custom:flowio-header-card
+title: État du bassin
+entity_prefix: fio
+measurements: [water_temperature, orp, air_temperature]
+status: true
+grid_options:
+  columns: full
+```
+
+Le statut vient des alarmes firmware (`sensor.<préfixe>_alm_active_count` et `binary_sensor.<préfixe>_alm_any_active`) : « État normal » ou « Alarme en cours ». La phrase de contexte suit le mode de filtration (`switch.<préfixe>_pl_modes_auto`) et le type de traitement (`select.<préfixe>_pl_modes_dis`). Les jauges reprennent les échelles de `flowio-pool-card` et le thème Home Assistant ; `status: false` masque le bandeau de statut. Cette carte est autonome : elle ne modifie pas la carte piscine.
 
 ## Historiques
 
