@@ -135,7 +135,7 @@ var al=Object.defineProperty;var sl=(n,e)=>()=>(n&&(e=n(n=0)),e);var rl=(n,e)=>{
     .heading-copy h3{margin:0;font-size:1.05rem;font-weight:650;line-height:1.25;overflow-wrap:anywhere}
     .heading-copy p{margin:4px 0 0;font-size:.8rem;line-height:1.45;color:var(--secondary-text-color)}
     .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-    .tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;padding:12px;border:1px solid var(--divider-color);border-radius:12px;background:var(--secondary-background-color);text-align:left;font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overflow-wrap:anywhere}
+    .tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;padding:12px;border:1px solid var(--divider-color);border-radius:12px;background:transparent;text-align:left;font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overflow-wrap:anywhere}
     .tile:disabled{cursor:default;opacity:.7}
     .tile:not(:disabled):hover{border-color:var(--primary-color)}
     .tile-label{font-size:.72rem;line-height:1.3;color:var(--secondary-text-color)}
@@ -208,7 +208,7 @@ var al=Object.defineProperty;var sl=(n,e)=>()=>(n&&(e=n(n=0)),e);var rl=(n,e)=>{
     .probe-head:disabled{cursor:default}
     .probe-name{font-size:.86rem;font-weight:600;line-height:1.3}
     .probe-value{font-size:.9rem;font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
-    .bar{position:relative;height:9px;margin-top:8px;border-radius:999px;background:var(--secondary-background-color);box-shadow:inset 0 0 0 1px var(--divider-color);overflow:hidden}
+    .bar{position:relative;height:9px;margin-top:8px;border-radius:999px;background:transparent;box-shadow:inset 0 0 0 1px var(--divider-color);overflow:hidden}
     .fill{display:block;height:100%;border-radius:999px;background:var(--fio-accent);transition:width .2s ease}
     .limits{display:flex;justify-content:space-between;margin-top:5px;font-size:.62rem;color:var(--secondary-text-color);font-variant-numeric:tabular-nums}
     @media (prefers-reduced-motion: reduce){.fill{transition:none}}

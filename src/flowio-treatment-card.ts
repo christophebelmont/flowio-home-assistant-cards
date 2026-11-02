@@ -65,7 +65,7 @@ class FlowioTreatmentCard extends LitElement {
     .heading-copy h3{margin:0;font-size:1.05rem;font-weight:650;line-height:1.25;overflow-wrap:anywhere}
     .heading-copy p{margin:4px 0 0;font-size:.8rem;line-height:1.45;color:var(--secondary-text-color)}
     .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-    .tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;padding:12px;border:1px solid var(--divider-color);border-radius:12px;background:var(--secondary-background-color);text-align:left;font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overflow-wrap:anywhere}
+    .tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;padding:12px;border:1px solid var(--divider-color);border-radius:12px;background:transparent;text-align:left;font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overflow-wrap:anywhere}
     .tile:disabled{cursor:default;opacity:.7}
     .tile:not(:disabled):hover{border-color:var(--primary-color)}
     .tile-label{font-size:.72rem;line-height:1.3;color:var(--secondary-text-color)}
