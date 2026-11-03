@@ -106,17 +106,17 @@ class FlowioOverrideCard extends LitElement {
     ha-card{overflow:hidden}
     .body{padding:16px}
     .head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
-    .title{margin:0;font-size:calc(1.05rem * var(--fio-font-scale, 1.1));font-weight:650;line-height:1.25}
-    .badge{flex:none;padding:4px 12px;border:1px solid var(--divider-color);border-radius:999px;background:var(--secondary-background-color);color:var(--secondary-text-color);font-size:calc(.72rem * var(--fio-font-scale, 1.1));font-weight:600;line-height:1.4}
-    .badge[data-forced=true]{border-color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 14%,transparent);color:var(--primary-color)}
+    .title{margin:0;font-size:calc(1.05rem * var(--fio-font-scale, 1.32));font-weight:650;line-height:1.25}
+    .badge{flex:none;padding:4px 12px;border:1px solid var(--divider-color);border-radius:999px;background:var(--secondary-background-color);color:var(--secondary-text-color);font-size:calc(.72rem * var(--fio-font-scale, 1.32));font-weight:600;line-height:1.4}
+    .badge[data-forced=true]{border-color:var(--error-color);background:transparent;color:var(--error-color)}
     .durations{display:flex;flex-wrap:wrap;gap:8px}
-    .chip{min-height:40px;padding:6px 14px;border:1px solid var(--divider-color);border-radius:999px;background:var(--secondary-background-color);font:inherit;font-size:calc(.82rem * var(--fio-font-scale, 1.1));font-weight:600;color:inherit;cursor:pointer}
+    .chip{min-height:40px;padding:6px 14px;border:1px solid var(--divider-color);border-radius:999px;background:var(--secondary-background-color);font:inherit;font-size:calc(.82rem * var(--fio-font-scale, 1.32));font-weight:600;color:inherit;cursor:pointer}
     .chip[data-selected=true]{border-color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 14%,var(--secondary-background-color));color:var(--primary-color)}
     .chip:disabled{opacity:.55;cursor:default}
     .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-    .state{margin:14px 0 0;font-size:calc(.78rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color)}
+    .state{margin:14px 0 0;font-size:calc(.78rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
     .state[data-forced=true]{color:var(--primary-color);font-weight:600}
-    .error{margin:10px 0 0;font-size:calc(.78rem * var(--fio-font-scale, 1.1));color:var(--error-color)}
+    .error{margin:10px 0 0;font-size:calc(.78rem * var(--fio-font-scale, 1.32));color:var(--error-color)}
   `;
 }
 
@@ -155,7 +155,7 @@ class FlowioOverrideCardEditor extends LitElement {
     return html`<p>L’équipement est choisi dans la liste publiée par Flow.io (<code>select.&lt;préfixe&gt;_pdm_ovr_target</code>). La carte ne permet pas de le modifier en usage courant.</p>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${(field: { name: string }) => labels[field.name] ?? field.name} @value-changed=${this.changed}></ha-form>`;
   }
 
-  static styles = css`:host{display:block}p{color:var(--secondary-text-color);line-height:1.5}p[role=alert]{color:var(--error-color)}code{font-size:calc(.85em * var(--fio-font-scale, 1.1))}`;
+  static styles = css`:host{display:block}p{color:var(--secondary-text-color);line-height:1.5}p[role=alert]{color:var(--error-color)}code{font-size:calc(.85em * var(--fio-font-scale, 1.32))}`;
 }
 
 if (!customElements.get('flowio-override-card')) customElements.define('flowio-override-card', FlowioOverrideCard);

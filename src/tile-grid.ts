@@ -1,7 +1,7 @@
 import { LitElement, html, css, nothing, type PropertyValues } from 'lit';
 import { normalizePrefix } from './entities';
 import type { Hass } from './model';
-import { commonNamePrefix, displayName, entityName } from './names';
+import { commonEntityPrefix, displayName, entityName } from './names';
 
 export interface TileGridConfig {
   type: string;
@@ -94,7 +94,7 @@ export abstract class FlowioTileGridCard extends LitElement {
       if (!load) throw new Error('Helpers Home Assistant indisponibles');
       const helpers = await load();
       if (token !== this.generation || !this.isConnected) return;
-      const prefix = config.name_prefix || commonNamePrefix(config.entities.map(id => entityName(id, this.hass?.states[id])));
+      const prefix = config.name_prefix || commonEntityPrefix(config.entities, this.hass?.states);
       this.tiles = config.entities.map(entity => {
         const raw = entityName(entity, this.hass?.states[entity]);
         const tileConfig: Record<string, unknown> = { type: 'tile', entity, hide_state: false, icon_tap_action: { action: 'toggle' }, tap_action: { action: 'more-info' } };
@@ -131,9 +131,9 @@ export abstract class FlowioTileGridCard extends LitElement {
     :host{display:block;container-type:inline-size;color:var(--primary-text-color);font-family:var(--ha-font-family-body,inherit)}
     ha-card{overflow:hidden}
     .body{padding:16px}
-    .title{margin:0 0 12px;font-size:calc(1.05rem * var(--fio-font-scale, 1.1));font-weight:650;line-height:1.25}
-    .error{margin:0 0 10px;color:var(--error-color);font-size:calc(.78rem * var(--fio-font-scale, 1.1))}
-    .message{margin:0;font-size:calc(.82rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color)}
+    .title{margin:0 0 12px;font-size:calc(1.05rem * var(--fio-font-scale, 1.32));font-weight:650;line-height:1.25}
+    .error{margin:0 0 10px;color:var(--error-color);font-size:calc(.78rem * var(--fio-font-scale, 1.32))}
+    .message{margin:0;font-size:calc(.82rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
     .grid{display:grid;grid-template-columns:repeat(var(--columns,2),minmax(0,1fr));gap:10px}
     .grid>*{display:block;min-width:0}
     @container(max-width:420px){.grid{grid-template-columns:minmax(0,1fr)}}
@@ -165,7 +165,7 @@ export abstract class FlowioTileGridEditor extends LitElement {
     if (!this.hass) return [];
     const stem = this.config?.entity_prefix ? `${this.config.entity_prefix}_` : '';
     const ids = Object.keys(this.hass.states).filter(id => id.startsWith(`switch.${stem}`)).sort();
-    const prefix = this.config?.name_prefix || commonNamePrefix(ids.map(id => entityName(id, this.hass!.states[id])));
+    const prefix = this.config?.name_prefix || commonEntityPrefix(ids, this.hass.states);
     return ids.map(id => ({ value: id, label: `${displayName(entityName(id, this.hass!.states[id]), prefix)} · ${id}` }));
   }
 

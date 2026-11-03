@@ -3,7 +3,7 @@ import './flowio-graph-chart';
 import { available, type Hass } from './model';
 import { numericValue } from './gauge-model';
 import { historyPoints, historySummary, onIntervals, type HistoryPoint } from './history-data';
-import { commonNamePrefix, probeDisplayName, rawProbeName } from './probes-model';
+import { commonEntityPrefix, probeDisplayName, rawProbeName } from './probes-model';
 import { GRAPH_PALETTE, SHADE_PALETTE, defaultShadeColor, normalizeGraphConfig, seriesColor, shadeColor, type GraphConfig } from './graph-model';
 
 type GraphHass = Hass & { callApi?: (method: string, path: string) => Promise<unknown> };
@@ -58,7 +58,7 @@ class FlowioGraphCard extends LitElement {
   private namePrefix(): string {
     const config = this.config, hass = this.hass;
     if (!config || !hass) return '';
-    return config.name_prefix || commonNamePrefix(config.entities.map(id => rawProbeName(id, hass.states[id])));
+    return config.name_prefix || commonEntityPrefix(config.entities, hass.states);
   }
 
   private async load() {
@@ -96,10 +96,11 @@ class FlowioGraphCard extends LitElement {
     const shadeIds = Object.keys(config.shades);
     const shadeResults = await Promise.all(shadeIds.map(async (id, index) => {
       const color = shadeColor(config, id, index);
+      const currentOn = hass.states[id]?.state === 'on';
       try {
         const query = new URLSearchParams({ filter_entity_id: id, end_time: new Date(end).toISOString() });
         const response = await api('GET', `history/period/${new Date(start).toISOString()}?${query}`);
-        return { color, intervals: onIntervals(response, start, end) };
+        return { color, intervals: onIntervals(response, start, end, currentOn) };
       } catch {
         return { color, intervals: [] as [number, number][] };
       }
@@ -167,21 +168,21 @@ class FlowioGraphCard extends LitElement {
     .icon-plate{display:inline-flex;align-items:center;justify-content:center;flex:0 0 44px;width:44px;height:44px;border-radius:12px;color:var(--secondary-text-color);background:color-mix(in srgb,var(--secondary-text-color) 12%,transparent)}
     .icon-plate ha-icon{--mdc-icon-size:24px}
     .head-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 0}
-    .name{font-size:calc(.95rem * var(--fio-font-scale, 1.1));font-weight:600;line-height:1.25;overflow-wrap:anywhere}
-    .unit{font-size:calc(.78rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color)}
+    .name{font-size:calc(.95rem * var(--fio-font-scale, 1.32));font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+    .unit{font-size:calc(.78rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
     .current{display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:0;max-width:45%;padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer}
     .current:disabled{cursor:default}
-    .current strong{font-size:calc(1.5rem * var(--fio-font-scale, 1.1));font-weight:650;line-height:1.1;font-variant-numeric:tabular-nums}
-    .current small{font-size:calc(.68rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color)}
-    .warning{margin:8px 16px 0;font-size:calc(.78rem * var(--fio-font-scale, 1.1));color:var(--error-color)}
-    .message{margin:8px 16px 0;font-size:calc(.82rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color)}
+    .current strong{font-size:calc(1.5rem * var(--fio-font-scale, 1.32));font-weight:650;line-height:1.1;font-variant-numeric:tabular-nums}
+    .current small{font-size:calc(.68rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
+    .warning{margin:8px 16px 0;font-size:calc(.78rem * var(--fio-font-scale, 1.32));color:var(--error-color)}
+    .message{margin:8px 16px 0;font-size:calc(.82rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
     .ranges{display:flex;gap:6px}
-    .range{min-width:38px;height:32px;padding:0 8px;border:1px solid var(--divider-color);border-radius:10px;background:var(--secondary-background-color);color:var(--secondary-text-color);font:inherit;font-size:calc(.72rem * var(--fio-font-scale, 1.1));font-weight:600;cursor:pointer}
+    .range{min-width:38px;height:32px;padding:0 8px;border:1px solid var(--divider-color);border-radius:10px;background:var(--secondary-background-color);color:var(--secondary-text-color);font:inherit;font-size:calc(.72rem * var(--fio-font-scale, 1.32));font-weight:600;cursor:pointer}
     .range[data-selected=true]{border-color:var(--primary-color);color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 12%,var(--secondary-background-color))}
     .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:14px 16px;border-top:1px solid var(--divider-color)}
     .stats span{display:flex;flex-direction:column;gap:5px;min-width:0}
-    .stats small{font-size:calc(.62rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color)}
-    .stats strong{font-size:calc(1rem * var(--fio-font-scale, 1.1));font-variant-numeric:tabular-nums}
+    .stats small{font-size:calc(.62rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
+    .stats strong{font-size:calc(1rem * var(--fio-font-scale, 1.32));font-variant-numeric:tabular-nums}
   `;
 }
 
@@ -232,21 +233,21 @@ class FlowioGraphCardEditor extends LitElement {
     if (!this.hass) return [];
     const stem = this.config?.entity_prefix ? `${this.config.entity_prefix}_` : '';
     const ids = Object.keys(this.hass.states).filter(id => id.startsWith(`switch.${stem}`) || id.startsWith(`binary_sensor.${stem}`)).sort();
-    const prefix = this.namePrefix();
+    const prefix = this.config?.name_prefix || commonEntityPrefix(ids, this.hass.states);
     return ids.map(id => ({ value: id, label: `${probeDisplayName(rawProbeName(id, this.hass!.states[id]), prefix)} · ${id}` }));
   }
 
   private namePrefix(): string {
     const config = this.config, hass = this.hass;
     if (!config || !hass) return '';
-    return config.name_prefix || commonNamePrefix(config.entities.map(id => rawProbeName(id, hass.states[id])));
+    return config.name_prefix || commonEntityPrefix(config.entities, hass.states);
   }
 
   private options(): { value: string; label: string }[] {
     if (!this.hass) return [];
     const stem = this.config?.entity_prefix ? `${this.config.entity_prefix}_` : '';
     const ids = Object.keys(this.hass.states).filter(id => id.startsWith(`sensor.${stem}`)).sort();
-    const prefix = this.namePrefix();
+    const prefix = this.config?.name_prefix || commonEntityPrefix(ids, this.hass.states);
     return ids.map(id => ({ value: id, label: `${probeDisplayName(rawProbeName(id, this.hass!.states[id]), prefix)} · ${id}` }));
   }
 
@@ -305,12 +306,12 @@ class FlowioGraphCardEditor extends LitElement {
     p{color:var(--secondary-text-color);line-height:1.5}
     p[role=alert]{color:var(--error-color)}
     .colors{margin-top:16px}
-    .colors h4{margin:0 0 10px;font-size:calc(.9rem * var(--fio-font-scale, 1.1))}
+    .colors h4{margin:0 0 10px;font-size:calc(.9rem * var(--fio-font-scale, 1.32))}
     .color-row{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
-    .color-name{font-size:calc(.8rem * var(--fio-font-scale, 1.1));font-weight:600}
+    .color-name{font-size:calc(.8rem * var(--fio-font-scale, 1.32));font-weight:600}
     .swatches{display:flex;flex-wrap:wrap;gap:6px}
     .swatch{width:26px;height:26px;padding:0;border-radius:50%;border:1px solid var(--divider-color);background:var(--swatch);cursor:pointer}
-    .swatch.auto{width:auto;padding:0 10px;border-radius:999px;background:var(--secondary-background-color);font:inherit;font-size:calc(.72rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color)}
+    .swatch.auto{width:auto;padding:0 10px;border-radius:999px;background:var(--secondary-background-color);font:inherit;font-size:calc(.72rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
     .swatch[data-selected=true]{outline:2px solid var(--primary-color);outline-offset:2px}
   `;
 }

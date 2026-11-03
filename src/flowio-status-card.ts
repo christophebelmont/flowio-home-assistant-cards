@@ -59,15 +59,15 @@ class FlowioStatusCard extends LitElement {
     :host{display:block;container-type:inline-size;color:var(--primary-text-color);font-family:var(--ha-font-family-body,inherit)}
     ha-card{overflow:hidden}
     .body{padding:16px}
-    .title{margin:0 0 12px;font-size:calc(1.05rem * var(--fio-font-scale, 1.1));font-weight:650;line-height:1.25}
+    .title{margin:0 0 12px;font-size:calc(1.05rem * var(--fio-font-scale, 1.32));font-weight:650;line-height:1.25}
     .list{display:flex;flex-direction:column}
     .row{display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 0;border:0;border-bottom:1px solid var(--divider-color);background:none;font:inherit;color:inherit;text-align:left;cursor:pointer;overflow-wrap:anywhere}
     .row:last-child{border-bottom:0}
     .row:disabled{cursor:default}
     .icon-plate{display:inline-flex;align-items:center;justify-content:center;flex:0 0 30px;width:30px;height:30px;border-radius:9px;color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 14%,var(--ha-card-background,var(--card-background-color)))}
     .icon-plate ha-icon{--mdc-icon-size:18px}
-    .label{flex:1 1 0;min-width:0;font-size:calc(.84rem * var(--fio-font-scale, 1.1))}
-    .value{font-size:calc(.86rem * var(--fio-font-scale, 1.1));font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .label{flex:1 1 0;min-width:0;font-size:calc(.84rem * var(--fio-font-scale, 1.32))}
+    .value{font-size:calc(.86rem * var(--fio-font-scale, 1.32));font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
   `;
 }
 

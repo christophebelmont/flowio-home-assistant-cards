@@ -17,7 +17,7 @@ Cartes de supervision et de pilotage pour les entités MQTT du firmware Flow.io-
 - `custom:flowio-treatment-card` : informations du traitement actif, adaptées au type configuré (chlore/brome, électrolyse, oxygène actif, désactivé).
 - `custom:flowio-equipment-card` : grille de tuiles pour les équipements sélectionnés (bascule par l’icône).
 - `custom:flowio-modes-card` : grille de tuiles pour les modes manuel, automatique et hivernage.
-- `custom:flowio-probes-card` : sondes avec barres de valeur, dont les sondes `data_*` découvertes automatiquement.
+- `custom:flowio-probes-card` : grille de sondes en barres ou jauges, nom/couleur/échelle configurables.
 - `custom:flowio-alarms-card` : synthèse des alarmes surveillées et liste des alarmes actives.
 - `custom:flowio-status-card` : informations système du contrôleur (IP, mémoire, temps de fonctionnement, tension, courant).
 - `custom:flowio-override-card` : forçage d’un équipement en marche/arrêt pendant une durée choisie.
@@ -136,15 +136,19 @@ Même modèle que la carte Équipements : grille de tuiles standard, nom, colonn
 type: custom:flowio-probes-card
 title: Sondes
 entity_prefix: fio
-entities: [sensor.fio_io_wat_tmp, sensor.fio_io_air_tmp, sensor.fio_io_orp, sensor.fio_io_psi]
+columns: 2
+entities: [sensor.fio_io_wat_tmp, sensor.fio_io_orp]
 name_prefix: ''
-colors:
-  sensor.fio_io_orp: orp
-scales:
-  sensor.fio_io_wat_tmp: { min: 0, max: 40 }
+items:
+  sensor.fio_io_orp:
+    name: Redox
+    color: '#8e24aa'
+    min: 350
+    max: 900
+    mode: gauge
 ```
 
-`entities` liste les sondes affichées (l’éditeur propose les capteurs du préfixe). Le nom affiché retire le préfixe d’équipement commun (par exemple « Flow.io Waveshare »), détecté automatiquement ou forcé via `name_prefix`. Les couleurs suivent le modèle Flow.io (Eau, Air, pH, ORP, Pression) choisies automatiquement par sonde et modifiables via `colors` (nom de couleur ou code CSS personnalisé). Les barres utilisent `scales` si défini, sinon les bornes `min`/`max` de l’entité, sinon une échelle par défaut selon l’unité. Une entité absente est signalée explicitement.
+`columns` règle le nombre de colonnes de la grille (1–6). `entities` liste les sondes affichées (l’éditeur propose les capteurs du préfixe, avec le préfixe d’équipement retiré). Le nom affiché retire le préfixe commun (par exemple « Flow.io Waveshare »), détecté automatiquement ou forcé via `name_prefix`. Chaque sonde peut être personnalisée via `items[<entité>]` : `name` (nom convivial), `color` (nom de modèle Flow.io ou code CSS), `min`/`max` (échelle) et `mode` (`line` = barre, ou `gauge` = jauge). Sans personnalisation, la couleur suit le modèle Flow.io, l’échelle les bornes de l’entité ou des valeurs par défaut par unité, et le mode est `line`. Les anciens champs `colors` et `scales` restent acceptés et migrés. Une entité absente est signalée explicitement.
 
 ## Alarmes
 

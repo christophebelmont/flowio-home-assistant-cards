@@ -86,13 +86,13 @@ class FlowioHeaderCard extends LitElement {
     ha-card{position:relative;overflow:hidden}
     .body{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;padding:16px}
     .status{flex:1 1 240px;min-width:0}
-    .eyebrow{display:block;font-size:calc(.68rem * var(--fio-font-scale, 1.1));font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--secondary-text-color)}
+    .eyebrow{display:block;font-size:calc(.68rem * var(--fio-font-scale, 1.32));font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--secondary-text-color)}
     .status-line{display:flex;align-items:center;gap:10px;margin-top:6px}
     .status-icon{flex-shrink:0;--mdc-icon-size:26px;color:var(--secondary-text-color)}
     .status[data-tone=ok] .status-icon{color:var(--success-color,#2e7d32)}
     .status[data-tone=alert] .status-icon{color:var(--error-color)}
-    .status-title{font-size:calc(1.35rem * var(--fio-font-scale, 1.1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}
-    .status-description{margin:6px 0 0;font-size:calc(.82rem * var(--fio-font-scale, 1.1));line-height:1.45;color:var(--secondary-text-color)}
+    .status-title{font-size:calc(1.35rem * var(--fio-font-scale, 1.32));font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+    .status-description{margin:6px 0 0;font-size:calc(.82rem * var(--fio-font-scale, 1.32));line-height:1.45;color:var(--secondary-text-color)}
     .gauges{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px 18px;margin-inline-start:auto}
     .gauge{display:flex;flex-direction:column;align-items:center;gap:4px;width:92px;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
     .gauge:disabled{cursor:default}
@@ -101,9 +101,9 @@ class FlowioHeaderCard extends LitElement {
     .track{stroke:var(--divider-color);opacity:.6}
     .progress{stroke:var(--fio-accent);transition:stroke-dasharray .24s ease}
     .reading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
-    .reading strong{font-size:calc(1.2rem * var(--fio-font-scale, 1.1));font-weight:600;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
-    .reading small{font-size:calc(.66rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color)}
-    .caption{display:flex;align-items:center;gap:4px;font-size:calc(.72rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color)}
+    .reading strong{font-size:calc(1.2rem * var(--fio-font-scale, 1.32));font-weight:600;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+    .reading small{font-size:calc(.66rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
+    .caption{display:flex;align-items:center;gap:4px;font-size:calc(.72rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
     .caption ha-icon{--mdc-icon-size:15px;color:var(--fio-accent)}
     .gauge[data-tone=water]{--fio-accent:var(--fio-water)}
     .gauge[data-tone=air]{--fio-accent:var(--fio-air)}

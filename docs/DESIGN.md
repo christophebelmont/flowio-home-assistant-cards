@@ -16,6 +16,6 @@ Les couleurs distinguent les catégories sans inventer de conformité chimique. 
 
 Un thème peut définir flowio-water-color, flowio-air-color, flowio-ph-color, flowio-orp-color et flowio-pressure-color. Les autres couleurs viennent des variables de palette HA puis primary/accent.
 
-Les tailles de police des cartes sont multipliées par `--fio-font-scale` (1,1 par défaut). La définir dans un thème ajuste globalement la lisibilité de toutes les cartes.
+Les tailles de police des cartes sont multipliées par `--fio-font-scale` (1,32 par défaut). La définir dans un thème ajuste globalement la lisibilité de toutes les cartes.
 
 Voir docs/TIMING.md pour les horaires calculés et compteurs. Les tests couvrent géométrie, échelles, valeurs absentes, compteurs, sélections et actions simulées. Quatre captures clair/sombre mobile/ordinateur sont jointes au rapport CI ; leurs courbes sont explicitement simulées, pas des historiques HA réels. Aucun succès de ce lot n'est présumé avant sa CI et l'essai dans votre instance. Après réussite de check et publish-dist, installer main actualisé ou publier une nouvelle beta. Les releases et le firmware existants ne sont pas modifiés.

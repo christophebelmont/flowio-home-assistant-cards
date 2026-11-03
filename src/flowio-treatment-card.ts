@@ -62,14 +62,14 @@ class FlowioTreatmentCard extends LitElement {
     .icon-plate{display:inline-flex;align-items:center;justify-content:center;flex:0 0 44px;width:44px;height:44px;border-radius:50%;color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 12%,var(--ha-card-background,var(--card-background-color)))}
     .icon-plate ha-icon{--mdc-icon-size:24px}
     .heading-copy{min-width:0}
-    .heading-copy h3{margin:0;font-size:calc(1.05rem * var(--fio-font-scale, 1.1));font-weight:650;line-height:1.25;overflow-wrap:anywhere}
-    .heading-copy p{margin:4px 0 0;font-size:calc(.8rem * var(--fio-font-scale, 1.1));line-height:1.45;color:var(--secondary-text-color)}
+    .heading-copy h3{margin:0;font-size:calc(1.05rem * var(--fio-font-scale, 1.32));font-weight:650;line-height:1.25;overflow-wrap:anywhere}
+    .heading-copy p{margin:4px 0 0;font-size:calc(.8rem * var(--fio-font-scale, 1.32));line-height:1.45;color:var(--secondary-text-color)}
     .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
     .tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;padding:12px;border:1px solid var(--divider-color);border-radius:12px;background:transparent;text-align:left;font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overflow-wrap:anywhere}
     .tile:disabled{cursor:default;opacity:.7}
     .tile:not(:disabled):hover{border-color:var(--primary-color)}
-    .tile-label{font-size:calc(.72rem * var(--fio-font-scale, 1.1));line-height:1.3;color:var(--secondary-text-color)}
-    .tile-value{font-size:calc(1.05rem * var(--fio-font-scale, 1.1));font-weight:650;line-height:1.25;font-variant-numeric:tabular-nums}
+    .tile-label{font-size:calc(.72rem * var(--fio-font-scale, 1.32));line-height:1.3;color:var(--secondary-text-color)}
+    .tile-value{font-size:calc(1.05rem * var(--fio-font-scale, 1.32));font-weight:650;line-height:1.25;font-variant-numeric:tabular-nums}
     @container(max-width:360px){.tiles{grid-template-columns:minmax(0,1fr)}}
     @media (prefers-reduced-motion: reduce){.tile{transition:none}}
   `;

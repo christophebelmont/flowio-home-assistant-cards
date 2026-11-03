@@ -1,8 +1,8 @@
 import { expect, it } from 'vitest';
 import type { Hass } from '../src/model';
 import { normalizeTileGridConfig } from '../src/tile-grid';
-import { commonNamePrefix, displayName, entityName } from '../src/names';
-import { commonNamePrefix, normalizeProbesConfig, probeDisplayName, probeIds, probeScale, probeTone, probeValue, resolveProbeColor } from '../src/probes-model';
+import { commonEntityPrefix, commonNamePrefix, displayName, entityName } from '../src/names';
+import { normalizeProbesConfig, probeDisplayName, probeIds, probeLabel, probeMode, probeScale, probeTone, probeValue, resolveProbeColor } from '../src/probes-model';
 import { formatUptime, normalizeStatusConfig, statusBindings, statusValue } from '../src/status-model';
 import { normalizeOverrideConfig, overrideAvailable, overrideForced, overrideRemainingMinutes } from '../src/override-model';
 import { alarmEntries, alarmSummary, normalizeAlarmsConfig } from '../src/alarms-model';
@@ -26,6 +26,18 @@ it('configure une grille de tuiles (nom, colonnes, entités, préfixe)', () => {
   }
 });
 
+it('détecte le préfixe majoritaire malgré des noms hétérogènes', () => {
+  const states = {
+    'sensor.a': state('1', { friendly_name: 'Flow.io Waveshare Eau' }),
+    'sensor.b': state('1', { friendly_name: 'Flow.io Waveshare Air' }),
+    'sensor.c': state('1', { friendly_name: 'Adresse IP' }),
+    'sensor.d': state('1', {})
+  };
+  expect(commonEntityPrefix(Object.keys(states), states)).toBe('Flow.io Waveshare ');
+  expect(commonEntityPrefix(['sensor.a'], states)).toBe('');
+  expect(commonEntityPrefix(['sensor.c', 'sensor.d'], states)).toBe('');
+});
+
 it('retire le préfixe de nom partagé', () => {
   expect(entityName('sensor.x', state('1', { friendly_name: 'Flow.io Waveshare pH' }))).toBe('Flow.io Waveshare pH');
   expect(entityName('sensor.x', state('1', {}))).toBe('sensor.x');
@@ -45,6 +57,20 @@ it('configure la carte sondes', () => {
 it('liste les sondes sélectionnées', () => {
   const config = normalizeProbesConfig({ entity_prefix: 'fio', entities: ['sensor.fio_io_ph', 'sensor.fio_io_ph', 'sensor.fio_data_112'] });
   expect(probeIds(config)).toEqual(['sensor.fio_io_ph', 'sensor.fio_data_112']);
+});
+
+it('configure colonnes et personnalisations par sonde', () => {
+  const config = normalizeProbesConfig({ columns: 3, items: { 'sensor.a': { name: 'Eau', min: 0, max: 40, mode: 'gauge', color: '#123456' } } });
+  expect(config.columns).toBe(3);
+  expect(config.items['sensor.a']).toEqual({ name: 'Eau', min: 0, max: 40, mode: 'gauge', color: '#123456' });
+  expect(probeLabel(config, 'sensor.a', undefined, '')).toBe('Eau');
+  expect(probeMode(config, 'sensor.a')).toBe('gauge');
+  expect(probeMode(config, 'sensor.b')).toBe('line');
+  expect(probeScale(config, 'sensor.a')).toEqual({ min: 0, max: 40 });
+  expect(normalizeProbesConfig({}).columns).toBe(2);
+  for (const input of [{ columns: 0 }, { columns: 7 }, { items: { 'sensor.a': { mode: 'pie' } } }, { items: { 'sensor.a': { min: 10, max: 5 } } }, { items: { 'sensor.a': { name: 3 } } }]) {
+    expect(() => normalizeProbesConfig(input)).toThrow();
+  }
 });
 
 it('retire le préfixe d’équipement et choisit une couleur par sonde', () => {

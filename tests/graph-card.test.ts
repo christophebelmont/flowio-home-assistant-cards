@@ -60,4 +60,13 @@ it('calcule les intervalles allumés pour l’ombrage', () => {
     [new Date(2026, 0, 1, 0, 40).getTime(), end]
   ]);
   expect(onIntervals(null, start, end)).toEqual([]);
+  // réponse plate (non imbriquée)
+  expect(onIntervals(response[0], start, end)).toHaveLength(2);
+  // dernier intervalle fermé si l'entité n'est plus allumée
+  expect(onIntervals(response, start, end, false)).toEqual([
+    [new Date(2026, 0, 1, 0, 10).getTime(), new Date(2026, 0, 1, 0, 30).getTime()]
+  ]);
+  // un seul point allumé s'étend jusqu'à la fin de la période
+  const single = [[{ state: 'on', last_changed: at(5) }]];
+  expect(onIntervals(single, start, end)).toEqual([[new Date(2026, 0, 1, 0, 5).getTime(), end]]);
 });

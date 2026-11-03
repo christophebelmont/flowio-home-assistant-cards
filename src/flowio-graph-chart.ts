@@ -138,7 +138,7 @@ class FlowioGraphChart extends LitElement {
   static styles = css`
     :host{display:block;min-width:0}
     .plot{width:100%;min-height:245px;min-width:0}
-    [role=alert]{font-size:calc(.75rem * var(--fio-font-scale, 1.1));color:var(--error-color);padding:0 12px}
+    [role=alert]{font-size:calc(.75rem * var(--fio-font-scale, 1.32));color:var(--error-color);padding:0 12px}
     .apexcharts-canvas{position:relative;user-select:none}
     .apexcharts-tooltip{position:absolute;display:flex;flex-direction:column;z-index:12;opacity:0;pointer-events:none;border:1px solid var(--divider-color);border-radius:10px;background:var(--ha-card-background,var(--card-background-color));color:var(--primary-text-color);box-shadow:0 4px 18px color-mix(in srgb,var(--primary-text-color) 12%,transparent);font:12px inherit}
     .apexcharts-tooltip.apexcharts-active{opacity:1}
