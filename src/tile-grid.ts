@@ -1,12 +1,14 @@
 import { LitElement, html, css, nothing, type PropertyValues } from 'lit';
 import { normalizePrefix } from './entities';
 import type { Hass } from './model';
+import { commonNamePrefix, displayName, entityName } from './names';
 
 export interface TileGridConfig {
   type: string;
   title: string;
   columns: number;
   entity_prefix: string;
+  name_prefix: string;
   entities: string[];
   grid_options?: Record<string, unknown>;
 }
@@ -20,6 +22,8 @@ export function normalizeTileGridConfig(input: unknown, type: string, defaultTit
   if (typeof columns !== 'number' || !Number.isInteger(columns) || columns < 1 || columns > 6) {
     throw new Error('Nombre de colonnes attendu entre 1 et 6');
   }
+  const name_prefix = raw.name_prefix ?? '';
+  if (typeof name_prefix !== 'string') throw new Error('name_prefix doit être un texte');
   const supplied = raw.entities === undefined ? [] : raw.entities;
   if (!Array.isArray(supplied) || supplied.some(value => typeof value !== 'string' || !value.trim())) {
     throw new Error('Liste d’entités invalide');
@@ -33,6 +37,7 @@ export function normalizeTileGridConfig(input: unknown, type: string, defaultTit
     title,
     columns,
     entity_prefix: normalizePrefix(raw.entity_prefix),
+    name_prefix,
     entities: [...new Set(supplied)] as string[],
     ...(grid_options ? { grid_options: grid_options as Record<string, unknown> } : {})
   };
@@ -79,7 +84,7 @@ export abstract class FlowioTileGridCard extends LitElement {
   private async syncTiles() {
     const config = this.config;
     if (!config) return;
-    const key = JSON.stringify({ columns: config.columns, entities: config.entities });
+    const key = JSON.stringify({ columns: config.columns, entities: config.entities, name_prefix: config.name_prefix });
     if (key === this.key && this.synced) { this.mount(); return; }
     if (this.loading) return;
     this.loading = true;
@@ -89,8 +94,13 @@ export abstract class FlowioTileGridCard extends LitElement {
       if (!load) throw new Error('Helpers Home Assistant indisponibles');
       const helpers = await load();
       if (token !== this.generation || !this.isConnected) return;
+      const prefix = config.name_prefix || commonNamePrefix(config.entities.map(id => entityName(id, this.hass?.states[id])));
       this.tiles = config.entities.map(entity => {
-        const card = helpers.createCardElement({ type: 'tile', entity, hide_state: false, icon_tap_action: { action: 'toggle' }, tap_action: { action: 'more-info' } });
+        const raw = entityName(entity, this.hass?.states[entity]);
+        const tileConfig: Record<string, unknown> = { type: 'tile', entity, hide_state: false, icon_tap_action: { action: 'toggle' }, tap_action: { action: 'more-info' } };
+        const stripped = displayName(raw, prefix);
+        if (stripped !== raw) tileConfig.name = stripped;
+        const card = helpers.createCardElement(tileConfig);
         card.hass = this.hass;
         return card;
       });
@@ -154,13 +164,9 @@ export abstract class FlowioTileGridEditor extends LitElement {
   private options(): { value: string; label: string }[] {
     if (!this.hass) return [];
     const stem = this.config?.entity_prefix ? `${this.config.entity_prefix}_` : '';
-    return Object.keys(this.hass.states)
-      .filter(id => id.startsWith(`switch.${stem}`))
-      .sort()
-      .map(id => {
-        const name = this.hass!.states[id].attributes.friendly_name;
-        return { value: id, label: typeof name === 'string' && name ? `${name} · ${id}` : id };
-      });
+    const ids = Object.keys(this.hass.states).filter(id => id.startsWith(`switch.${stem}`)).sort();
+    const prefix = this.config?.name_prefix || commonNamePrefix(ids.map(id => entityName(id, this.hass!.states[id])));
+    return ids.map(id => ({ value: id, label: `${displayName(entityName(id, this.hass!.states[id]), prefix)} · ${id}` }));
   }
 
   render() {
@@ -169,9 +175,10 @@ export abstract class FlowioTileGridEditor extends LitElement {
       { name: 'title', selector: { text: {} } },
       { name: 'columns', selector: { number: { min: 1, max: 6, step: 1, mode: 'box' } } },
       { name: 'entity_prefix', selector: { text: {} } },
+      { name: 'name_prefix', selector: { text: {} } },
       { name: 'entities', selector: { select: { multiple: true, mode: 'list', options: this.options() } } }
     ];
-    const labels: Record<string, string> = { title: 'Nom', columns: 'Colonnes', entity_prefix: 'Préfixe firmware', entities: 'Entités' };
+    const labels: Record<string, string> = { title: 'Nom', columns: 'Colonnes', entity_prefix: 'Préfixe firmware', name_prefix: 'Texte à retirer devant les noms (vide = automatique)', entities: 'Entités' };
     return html`<p>Tuiles standard Home Assistant : cliquer sur l’icône bascule l’entité, cliquer ailleurs ouvre l’entité.</p>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${(field: { name: string }) => labels[field.name] ?? field.name} @value-changed=${this.changed}></ha-form>`;
   }
 

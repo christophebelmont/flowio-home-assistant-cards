@@ -63,7 +63,7 @@ class FlowioGraphCard extends LitElement {
   private namePrefix(): string {
     const config = this.config, hass = this.hass;
     if (!config || !hass) return '';
-    return commonNamePrefix(config.entities.map(id => rawProbeName(id, hass.states[id])));
+    return config.name_prefix || commonNamePrefix(config.entities.map(id => rawProbeName(id, hass.states[id])));
   }
 
   private async load() {
@@ -198,21 +198,23 @@ class FlowioGraphCardEditor extends LitElement {
     this.commit(normalizeGraphConfig({ ...this.config, colors }));
   }
 
+  private namePrefix(): string {
+    const config = this.config, hass = this.hass;
+    if (!config || !hass) return '';
+    return config.name_prefix || commonNamePrefix(config.entities.map(id => rawProbeName(id, hass.states[id])));
+  }
+
   private options(): { value: string; label: string }[] {
     if (!this.hass) return [];
     const stem = this.config?.entity_prefix ? `${this.config.entity_prefix}_` : '';
-    return Object.keys(this.hass.states)
-      .filter(id => id.startsWith(`sensor.${stem}`))
-      .sort()
-      .map(id => {
-        const name = this.hass!.states[id].attributes.friendly_name;
-        return { value: id, label: typeof name === 'string' && name ? `${name} · ${id}` : id };
-      });
+    const ids = Object.keys(this.hass.states).filter(id => id.startsWith(`sensor.${stem}`)).sort();
+    const prefix = this.namePrefix();
+    return ids.map(id => ({ value: id, label: `${probeDisplayName(rawProbeName(id, this.hass!.states[id]), prefix)} · ${id}` }));
   }
 
   private colorRow(id: string) {
     const selected = this.config!.colors[id] ?? '';
-    const name = rawProbeName(id, this.hass!.states[id]);
+    const name = probeDisplayName(rawProbeName(id, this.hass!.states[id]), this.namePrefix());
     return html`<div class=color-row>
       <span class=color-name>${name}</span>
       <div class=swatches role=group aria-label=${`Couleur de ${name}`}>
@@ -227,6 +229,7 @@ class FlowioGraphCardEditor extends LitElement {
     const labels: Record<string, string> = {
       title: 'Titre',
       entity_prefix: 'Préfixe firmware',
+      name_prefix: 'Texte à retirer devant les noms (vide = automatique)',
       hours_to_show: 'Période affichée (heures)',
       chart_type: 'Type de graphique',
       entities: 'Entités affichées'
@@ -234,6 +237,7 @@ class FlowioGraphCardEditor extends LitElement {
     const schema = [
       { name: 'title', selector: { text: {} } },
       { name: 'entity_prefix', selector: { text: {} } },
+      { name: 'name_prefix', selector: { text: {} } },
       { name: 'hours_to_show', selector: { number: { min: 1, max: 168, step: 1, mode: 'box', unit_of_measurement: 'h' } } },
       { name: 'chart_type', selector: { select: { mode: 'dropdown', options: [{ value: 'line', label: 'Courbe' }, { value: 'bar', label: 'Barres' }] } } },
       { name: 'entities', selector: { select: { multiple: true, mode: 'list', options: this.options() } } }

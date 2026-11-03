@@ -9,6 +9,7 @@ export interface GraphConfig {
   type: string;
   title: string;
   entity_prefix: string;
+  name_prefix: string;
   entities: string[];
   colors: Record<string, string>;
   hours_to_show: number;
@@ -27,6 +28,8 @@ export function normalizeGraphConfig(input: unknown): GraphConfig {
   }
   const chart_type = raw.chart_type ?? 'line';
   if (chart_type !== 'line' && chart_type !== 'bar') throw new Error('Type de graphique attendu : line ou bar');
+  const name_prefix = raw.name_prefix ?? '';
+  if (typeof name_prefix !== 'string') throw new Error('name_prefix doit être un texte');
   const supplied = raw.entities === undefined ? [] : raw.entities;
   if (!Array.isArray(supplied) || supplied.some(value => typeof value !== 'string' || !value.trim())) {
     throw new Error('Liste d’entités invalide');
@@ -47,6 +50,7 @@ export function normalizeGraphConfig(input: unknown): GraphConfig {
     type: 'custom:flowio-graph-card',
     title,
     entity_prefix: normalizePrefix(raw.entity_prefix),
+    name_prefix,
     entities: [...new Set(supplied)] as string[],
     colors,
     hours_to_show: hours,

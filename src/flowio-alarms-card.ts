@@ -1,5 +1,6 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { alarmEntries, alarmSummary, normalizeAlarmsConfig, type AlarmsConfig } from './alarms-model';
+import { commonNamePrefix, displayName } from './names';
 import type { Hass } from './model';
 
 class FlowioAlarmsCard extends LitElement {
@@ -22,7 +23,9 @@ class FlowioAlarmsCard extends LitElement {
     const config = this.config, hass = this.hass;
     if (!config || !hass) return html`<ha-card><div class=body>En attente de Home Assistant…</div></ha-card>`;
     const summary = alarmSummary(hass, config.entity_prefix);
-    const active = alarmEntries(hass, config.entity_prefix).filter(entry => entry.active);
+    const entries = alarmEntries(hass, config.entity_prefix);
+    const prefix = config.name_prefix || commonNamePrefix(entries.map(entry => entry.title));
+    const active = entries.filter(entry => entry.active);
     const icon = summary.tone === 'alert' ? 'mdi:alert-circle' : summary.tone === 'ok' ? 'mdi:check-circle' : 'mdi:help-circle';
     const count = summary.total > 0 ? `${summary.total} alarme${summary.total > 1 ? 's' : ''} surveillée${summary.total > 1 ? 's' : ''}` : 'Alarmes non détectées';
     return html`<ha-card><div class=body>
@@ -31,7 +34,7 @@ class FlowioAlarmsCard extends LitElement {
         <span class=summary-icon><ha-icon .icon=${icon} aria-hidden=true></ha-icon></span>
         <div class=summary-copy><strong>${count}</strong><span>${summary.label}</span></div>
       </div>
-      ${active.length ? html`<ul class=list>${active.map(entry => html`<li><button type=button @click=${() => this.more(entry.entityId)}><ha-icon icon=mdi:alert-outline aria-hidden=true></ha-icon>${entry.title}</button></li>`)}</ul>` : nothing}
+      ${active.length ? html`<ul class=list>${active.map(entry => html`<li><button type=button @click=${() => this.more(entry.entityId)}><ha-icon icon=mdi:alert-outline aria-hidden=true></ha-icon>${displayName(entry.title, prefix)}</button></li>`)}</ul>` : nothing}
     </div></ha-card>`;
   }
 
@@ -81,9 +84,10 @@ class FlowioAlarmsCardEditor extends LitElement {
     if (!this.config || !this.hass) return nothing;
     const schema = [
       { name: 'title', selector: { text: {} } },
-      { name: 'entity_prefix', selector: { text: {} } }
+      { name: 'entity_prefix', selector: { text: {} } },
+      { name: 'name_prefix', selector: { text: {} } }
     ];
-    const labels: Record<string, string> = { title: 'Titre', entity_prefix: 'Préfixe firmware' };
+    const labels: Record<string, string> = { title: 'Titre', entity_prefix: 'Préfixe firmware', name_prefix: 'Texte à retirer devant les noms (vide = automatique)' };
     return html`<p>Les alarmes sont détectées depuis les entités <code>binary_sensor.&lt;préfixe&gt;_alm_*_active</code> publiées par Flow.io.</p>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${(field: { name: string }) => labels[field.name] ?? field.name} @value-changed=${this.changed}></ha-form>`;
   }
 

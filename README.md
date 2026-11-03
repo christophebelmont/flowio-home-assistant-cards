@@ -116,7 +116,7 @@ columns: 2
 entities: [switch.fio_io_flt_pmp, switch.fio_io_ph_pmp, switch.fio_io_chl_pmp]
 ```
 
-Carte encadrée contenant une grille de tuiles standard Home Assistant. Le nom, le nombre de colonnes (1–6) et la liste des entités se règlent dans l’éditeur. Cliquer sur l’icône bascule l’entité ; cliquer ailleurs ouvre l’entité. Les couleurs suivent l’état (tuile standard). Les démarrages sensibles et les sécurités restent gérés par Flow.io.
+Carte encadrée contenant une grille de tuiles standard Home Assistant. Le nom, le nombre de colonnes (1–6), le texte à retirer devant les noms (ex. « Flow.io Waveshare », vide = détection automatique) et la liste des entités se règlent dans l’éditeur. Cliquer sur l’icône bascule l’entité ; cliquer ailleurs ouvre l’entité. Les couleurs suivent l’état (tuile standard). Les démarrages sensibles et les sécurités restent gérés par Flow.io.
 
 ## Modes
 
@@ -128,7 +128,7 @@ columns: 2
 entities: [switch.fio_pl_modes_auto, switch.fio_pl_modes_winter, switch.fio_pl_ph_auto_mode]
 ```
 
-Même modèle que la carte Équipements : grille de tuiles standard, nom, colonnes et entités configurables. Cliquer sur l’icône bascule le mode ; cliquer ailleurs ouvre l’entité. Les modifications peuvent changer le pilotage automatique ; les sécurités restent dans Flow.io.
+Même modèle que la carte Équipements : grille de tuiles standard, nom, colonnes, texte à retirer devant les noms et entités configurables. Cliquer sur l’icône bascule le mode ; cliquer ailleurs ouvre l’entité. Les modifications peuvent changer le pilotage automatique ; les sécurités restent dans Flow.io.
 
 ## Sondes
 
@@ -155,7 +155,7 @@ title: Alarmes
 entity_prefix: fio
 ```
 
-Synthèse des alarmes surveillées (`binary_sensor.<préfixe>_alm_*_active`) : nombre total et état, puis liste des alarmes actives. Aucune alarme n’est acquittée par cette carte.
+Synthèse des alarmes surveillées (`binary_sensor.<préfixe>_alm_*_active`) : nombre total et état, puis liste des alarmes actives. `name_prefix` retire un texte devant les noms (vide = détection automatique). Aucune alarme n’est acquittée par cette carte.
 
 ## État système
 
@@ -193,7 +193,7 @@ colors:
   sensor.fio_io_wat_tmp: '#0288d1'
 ```
 
-Un seul graphique ApexCharts, en courbe (`line`) ou en barres (`bar`). `entities` liste les séries (l’éditeur propose toutes les entités du préfixe) ; chaque série peut recevoir une couleur via `colors` (choix par pastilles dans l’éditeur, ou code CSS). La couleur n’est portée que par le graphique : en-tête et pied restent au thème. `hours_to_show` vaut 12 h par défaut (1–168). Avec une seule entité, l’en-tête affiche son nom, son unité et la valeur actuelle, et le pied le minimum, la moyenne des échantillons et le maximum. Les données proviennent du Recorder ; aucune valeur indisponible n’est remplacée par zéro.
+Un seul graphique ApexCharts, en courbe (`line`) ou en barres (`bar`). `entities` liste les séries (l’éditeur propose toutes les entités du préfixe) ; `name_prefix` retire un texte devant les noms (vide = détection automatique) ; chaque série peut recevoir une couleur via `colors` (choix par pastilles dans l’éditeur, ou code CSS). La couleur n’est portée que par le graphique : en-tête et pied restent au thème. `hours_to_show` vaut 12 h par défaut (1–168). Avec une seule entité, l’en-tête affiche son nom, son unité et la valeur actuelle, et le pied le minimum, la moyenne des échantillons et le maximum. Les données proviennent du Recorder ; aucune valeur indisponible n’est remplacée par zéro.
 
 ## Historiques
 

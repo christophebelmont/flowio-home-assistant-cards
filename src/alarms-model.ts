@@ -5,6 +5,7 @@ export interface AlarmsConfig {
   type: string;
   title: string;
   entity_prefix: string;
+  name_prefix: string;
   grid_options?: Record<string, unknown>;
 }
 
@@ -28,6 +29,8 @@ export function normalizeAlarmsConfig(input: unknown): AlarmsConfig {
   const raw = input as Record<string, unknown>;
   const title = raw.title ?? 'Alarmes';
   if (typeof title !== 'string' || !title.trim()) throw new Error('Titre invalide');
+  const name_prefix = raw.name_prefix ?? '';
+  if (typeof name_prefix !== 'string') throw new Error('name_prefix doit être un texte');
   const grid_options = raw.grid_options === undefined ? undefined : raw.grid_options;
   if (grid_options !== undefined && (!grid_options || typeof grid_options !== 'object' || Array.isArray(grid_options))) {
     throw new Error('grid_options doit être un objet');
@@ -36,6 +39,7 @@ export function normalizeAlarmsConfig(input: unknown): AlarmsConfig {
     type: 'custom:flowio-alarms-card',
     title,
     entity_prefix: normalizePrefix(raw.entity_prefix),
+    name_prefix,
     ...(grid_options ? { grid_options: grid_options as Record<string, unknown> } : {})
   };
 }

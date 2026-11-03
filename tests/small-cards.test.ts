@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import type { Hass } from '../src/model';
 import { normalizeTileGridConfig } from '../src/tile-grid';
+import { commonNamePrefix, displayName, entityName } from '../src/names';
 import { commonNamePrefix, discoveredProbeIds, normalizeProbesConfig, probeDisplayName, probeIds, probeScale, probeTone, probeValue, resolveProbeColor } from '../src/probes-model';
 import { formatUptime, normalizeStatusConfig, statusBindings, statusValue } from '../src/status-model';
 import { normalizeOverrideConfig, overrideAvailable, overrideForced, overrideRemainingMinutes } from '../src/override-model';
@@ -9,18 +10,29 @@ import { alarmEntries, alarmSummary, normalizeAlarmsConfig } from '../src/alarms
 const state = (value: string, attributes: Record<string, unknown> = {}) => ({ state: value, attributes });
 const hass = (states: Record<string, ReturnType<typeof state>>): Hass => ({ states, callService: async () => undefined });
 
-it('configure une grille de tuiles (nom, colonnes, entités)', () => {
+it('configure une grille de tuiles (nom, colonnes, entités, préfixe)', () => {
   const config = normalizeTileGridConfig({}, 'custom:test', 'Équipements');
   expect(config.title).toBe('Équipements');
   expect(config.columns).toBe(2);
   expect(config.entities).toEqual([]);
-  const custom = normalizeTileGridConfig({ title: 'Relais', columns: 3, entities: ['switch.a', 'switch.a', 'switch.b'] }, 'custom:test', 'X');
+  expect(config.name_prefix).toBe('');
+  const custom = normalizeTileGridConfig({ title: 'Relais', columns: 3, name_prefix: 'Flow.io Waveshare ', entities: ['switch.a', 'switch.a', 'switch.b'] }, 'custom:test', 'X');
   expect(custom.title).toBe('Relais');
   expect(custom.columns).toBe(3);
+  expect(custom.name_prefix).toBe('Flow.io Waveshare ');
   expect(custom.entities).toEqual(['switch.a', 'switch.b']);
-  for (const input of [{ columns: 0 }, { columns: 7 }, { columns: 1.5 }, { entities: 'switch.a' }, { entities: [''] }, { title: '' }, { grid_options: [] }]) {
+  for (const input of [{ columns: 0 }, { columns: 7 }, { columns: 1.5 }, { entities: 'switch.a' }, { entities: [''] }, { title: '' }, { name_prefix: 3 }, { grid_options: [] }]) {
     expect(() => normalizeTileGridConfig(input, 'custom:test', 'X')).toThrow();
   }
+});
+
+it('retire le préfixe de nom partagé', () => {
+  expect(entityName('sensor.x', state('1', { friendly_name: 'Flow.io Waveshare pH' }))).toBe('Flow.io Waveshare pH');
+  expect(entityName('sensor.x', state('1', {}))).toBe('sensor.x');
+  expect(commonNamePrefix(['Flow.io Waveshare pH', 'Flow.io Waveshare ORP'])).toBe('Flow.io Waveshare ');
+  expect(commonNamePrefix(['pH', 'ORP'])).toBe('');
+  expect(displayName('Flow.io Waveshare pH', 'Flow.io Waveshare ')).toBe('pH');
+  expect(displayName('Bidon', 'Flow.io Waveshare ')).toBe('Bidon');
 });
 
 it('configure la carte sondes', () => {
@@ -102,6 +114,7 @@ it('configure la carte forçage et lit l’état', () => {
 
 it('résume les alarmes', () => {
   expect(normalizeAlarmsConfig({}).title).toBe('Alarmes');
+  expect(normalizeAlarmsConfig({ name_prefix: 'Flow.io Waveshare ' }).name_prefix).toBe('Flow.io Waveshare ');
   const entries = alarmEntries(hass({
     'binary_sensor.fio_alm_3_active': state('off', { friendly_name: 'Pression haute' }),
     'binary_sensor.fio_alm_1_active': state('on', { friendly_name: 'Débit faible' }),
