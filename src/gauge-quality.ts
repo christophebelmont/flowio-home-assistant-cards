@@ -20,7 +20,7 @@ export function qualityFor(role:Role,value:number|undefined,min:number,max:numbe
   const rangeLabel=role==='ph'?'Bon : 7,0–7,4 · moyen : 6,8–7,0 et 7,4–7,6':'Plage cible : 650–750 mV';
   return {tone,label:labelFor(tone,role),rangeLabel,bands};
 }
-export function bandPath(from:number,to:number,min:number,max:number,radius=46){
+export function bandPath(from:number,to:number,min:number,max:number,radius=50){
   if(![from,to,min,max,radius].every(Number.isFinite)||to<=from||max<=min)return '';
   const a0=Math.min(1,Math.max(0,(from-min)/(max-min))),a1=Math.min(1,Math.max(0,(to-min)/(max-min)));if(a1<=a0)return '';
   const start=135+270*a0,end=135+270*a1,point=(degrees:number)=>{const r=degrees*Math.PI/180;return{x:60+radius*Math.cos(r),y:60+radius*Math.sin(r)};},p0=point(start),p1=point(end);
