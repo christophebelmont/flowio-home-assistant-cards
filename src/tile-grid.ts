@@ -48,6 +48,7 @@ export abstract class FlowioTileGridCard extends LitElement {
   protected error = '';
   private tiles: NativeCard[] = [];
   private key = '';
+  private synced = false;
   private loading = false;
   private generation = 0;
 
@@ -79,7 +80,7 @@ export abstract class FlowioTileGridCard extends LitElement {
     const config = this.config;
     if (!config) return;
     const key = JSON.stringify({ columns: config.columns, entities: config.entities });
-    if (key === this.key && this.tiles.length) { this.mount(); return; }
+    if (key === this.key && this.synced) { this.mount(); return; }
     if (this.loading) return;
     this.loading = true;
     const token = ++this.generation;
@@ -94,11 +95,12 @@ export abstract class FlowioTileGridCard extends LitElement {
         return card;
       });
       this.key = key;
+      this.synced = true;
       this.error = '';
       this.requestUpdate();
     } catch (error) {
       console.error('[flowio] Tuiles natives Home Assistant indisponibles', error);
-      if (token === this.generation) this.error = 'Tuiles Home Assistant indisponibles. Recharger le tableau de bord.';
+      if (token === this.generation) { this.synced = false; this.error = 'Tuiles Home Assistant indisponibles. Recharger le tableau de bord.'; }
     } finally {
       if (token === this.generation) this.loading = false;
     }

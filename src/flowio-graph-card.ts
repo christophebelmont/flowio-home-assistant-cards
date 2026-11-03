@@ -15,6 +15,7 @@ class FlowioGraphCard extends LitElement {
   declare hass?: GraphHass;
   private config?: GraphConfig;
   private loaded: LoadedSeries[] = [];
+  private chartSeries: { name: string; color: string; points: HistoryPoint[] }[] = [];
   private hours = 12;
   private loading = false;
   private error = '';
@@ -99,6 +100,7 @@ class FlowioGraphCard extends LitElement {
     }));
     if (token !== this.generation || !this.isConnected) return;
     this.loaded = results;
+    this.chartSeries = results.map(item => ({ name: item.name, color: item.color, points: item.points }));
     this.loading = false;
   }
 
@@ -135,7 +137,7 @@ class FlowioGraphCard extends LitElement {
       ${this.controlsError ? html`<p class=warning role=alert>${this.controlsError}</p>` : nothing}
       ${!config.entities.length ? html`<p class=message>Choisir les entités dans l’éditeur.</p>` : nothing}
       ${this.error ? html`<p class=warning role=alert>${this.error}</p>` : nothing}
-      <flowio-graph-chart .series=${this.loaded.map(item => ({ name: item.name, color: item.color, points: item.points }))} .chartType=${config.chart_type} .label=${title} .unit=${single?.unit ?? ''} .start=${this.start} .end=${this.end}></flowio-graph-chart>
+      <flowio-graph-chart .series=${this.chartSeries} .chartType=${config.chart_type} .label=${title} .unit=${single?.unit ?? ''} .start=${this.start} .end=${this.end}></flowio-graph-chart>
       ${single && summary ? html`<div class=stats aria-label="Statistiques des échantillons disponibles"><span><small>Minimum</small><strong>${this.format(summary.min, '')}</strong></span><span><small>Moy. échant.</small><strong>${this.format(summary.mean, '')}</strong></span><span><small>Maximum</small><strong>${this.format(summary.max, '')}</strong></span></div>` : nothing}
     </div></ha-card>`;
   }
