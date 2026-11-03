@@ -9,8 +9,9 @@ export interface GraphSeries {
 }
 
 class FlowioGraphChart extends LitElement {
-  static properties = { series: { attribute: false }, chartType: { type: String }, label: { type: String }, unit: { type: String }, start: { type: Number }, end: { type: Number }, error: { state: true } };
+  static properties = { series: { attribute: false }, ranges: { attribute: false }, chartType: { type: String }, label: { type: String }, unit: { type: String }, start: { type: Number }, end: { type: Number }, error: { state: true } };
   series: GraphSeries[] = [];
+  ranges: { from: number; to: number; color: string }[] = [];
   chartType = 'line';
   label = '';
   unit = '';
@@ -57,7 +58,7 @@ class FlowioGraphChart extends LitElement {
   }
 
   protected updated(changed: PropertyValues) {
-    if (changed.has('series') || changed.has('chartType') || changed.has('label') || changed.has('unit') || changed.has('start') || changed.has('end')) this.request();
+    if (changed.has('series') || changed.has('ranges') || changed.has('chartType') || changed.has('label') || changed.has('unit') || changed.has('start') || changed.has('end')) this.request();
   }
 
   private async draw() {
@@ -110,6 +111,7 @@ class FlowioGraphChart extends LitElement {
         labels: { style: { colors: text, fontSize: '10px' }, formatter: (value: number) => Number.isFinite(value) ? new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(value) : '' }
       },
       tooltip: { theme: dark ? 'dark' : 'light', x: { format: 'dd MMM HH:mm' } },
+      annotations: { xaxis: this.ranges.map(range => ({ x: range.from, x2: range.to, fillColor: range.color, opacity: 0.6, borderColor: 'transparent' })) },
       noData: { text: 'Aucune donnée conservée' }
     };
     try {
@@ -129,39 +131,14 @@ class FlowioGraphChart extends LitElement {
     }
   }
 
-  private zoom(factor: number) {
-    if (!this.chart || this.end <= this.start) return;
-    const [from, to] = this.view ?? [this.start, this.end];
-    const full = this.end - this.start;
-    const width = Math.min(full, Math.max(Math.min(full, 60000), (to - from) * factor));
-    const middle = (from + to) / 2;
-    const min = Math.max(this.start, Math.min(middle - width / 2, this.end - width));
-    this.view = [min, min + width];
-    this.chart.zoomX(min, min + width);
-  }
-
-  private reset() {
-    this.view = undefined;
-    if (this.chart && this.end > this.start) this.chart.zoomX(this.start, this.end);
-  }
-
   render() {
-    return html`<div class=tools role=group aria-label=${`Zoom ${this.label}`}>
-      <ha-button class=zoom appearance=plain .accessibleLabel=${'Zoomer sur le graphique'} @click=${() => this.zoom(.5)}>+</ha-button>
-      <ha-button class=zoom appearance=plain .accessibleLabel=${'Dézoomer le graphique'} @click=${() => this.zoom(2)}>−</ha-button>
-      <ha-button class=zoom appearance=plain .accessibleLabel=${'Réinitialiser le zoom'} @click=${() => this.reset()}>↺</ha-button>
-    </div>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<div class=plot data-chart=apexcharts role=img aria-label=${`${this.label}, graphique en ${this.unit || 'valeur sans unité'}. Zoom par les boutons ou par sélection.`}></div>`;
+    return html`${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<div class=plot data-chart=apexcharts role=img aria-label=${`${this.label}, graphique en ${this.unit || 'valeur sans unité'}.`}></div>`;
   }
 
   static styles = css`
     :host{display:block;min-width:0}
     .plot{width:100%;min-height:245px;min-width:0}
-    .tools{display:flex;justify-content:flex-end;gap:4px;padding:6px 12px 0}
-    ha-button.zoom{--ha-button-height:34px;--ha-button-border-radius:9px;--wa-color-on-normal:var(--secondary-text-color);min-width:34px}
-    ha-button.zoom::part(base){width:34px;padding:0}
-    ha-button.zoom:hover{--wa-color-on-normal:var(--primary-color)}
-    ha-button.zoom:focus-visible{outline:2px solid var(--primary-color);outline-offset:2px}
-    [role=alert]{font-size:.75rem;color:var(--error-color);padding:0 12px}
+    [role=alert]{font-size:calc(.75rem * var(--fio-font-scale, 1.1));color:var(--error-color);padding:0 12px}
     .apexcharts-canvas{position:relative;user-select:none}
     .apexcharts-tooltip{position:absolute;display:flex;flex-direction:column;z-index:12;opacity:0;pointer-events:none;border:1px solid var(--divider-color);border-radius:10px;background:var(--ha-card-background,var(--card-background-color));color:var(--primary-text-color);box-shadow:0 4px 18px color-mix(in srgb,var(--primary-text-color) 12%,transparent);font:12px inherit}
     .apexcharts-tooltip.apexcharts-active{opacity:1}

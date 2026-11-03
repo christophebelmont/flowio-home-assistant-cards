@@ -131,9 +131,9 @@ export abstract class FlowioTileGridCard extends LitElement {
     :host{display:block;container-type:inline-size;color:var(--primary-text-color);font-family:var(--ha-font-family-body,inherit)}
     ha-card{overflow:hidden}
     .body{padding:16px}
-    .title{margin:0 0 12px;font-size:1.05rem;font-weight:650;line-height:1.25}
-    .error{margin:0 0 10px;color:var(--error-color);font-size:.78rem}
-    .message{margin:0;font-size:.82rem;color:var(--secondary-text-color)}
+    .title{margin:0 0 12px;font-size:calc(1.05rem * var(--fio-font-scale, 1.1));font-weight:650;line-height:1.25}
+    .error{margin:0 0 10px;color:var(--error-color);font-size:calc(.78rem * var(--fio-font-scale, 1.1))}
+    .message{margin:0;font-size:calc(.82rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color)}
     .grid{display:grid;grid-template-columns:repeat(var(--columns,2),minmax(0,1fr));gap:10px}
     .grid>*{display:block;min-width:0}
     @container(max-width:420px){.grid{grid-template-columns:minmax(0,1fr)}}

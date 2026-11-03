@@ -52,12 +52,12 @@ class FlowioProbesCard extends LitElement {
   render() {
     const config = this.config, hass = this.hass;
     if (!config || !hass) return html`<ha-card><div class=body>En attente de Home Assistant…</div></ha-card>`;
-    const ids = probeIds(config, hass);
+    const ids = probeIds(config);
     const namePrefix = config.name_prefix || commonNamePrefix(ids.map(id => rawProbeName(id, hass.states[id])));
     return html`<ha-card><div class=body>
       <h3 class=title>${config.title}</h3>
       ${ids.length ? html`<div class=probes>${ids.map(id => this.probe(id, namePrefix))}</div>`
-        : html`<p class=empty>${config.auto ? 'Aucune sonde découverte pour ce préfixe.' : 'Aucune entité sélectionnée.'}</p>`}
+        : html`<p class=empty>Aucune entité sélectionnée.</p>`}
     </div></ha-card>`;
   }
 
@@ -65,8 +65,8 @@ class FlowioProbesCard extends LitElement {
     :host{display:block;container-type:inline-size;color:var(--primary-text-color);font-family:var(--ha-font-family-body,inherit);--fio-accent:var(--primary-color);--fio-water:var(--flowio-water-color,var(--blue-color,var(--primary-color)));--fio-air:var(--flowio-air-color,var(--amber-color,var(--accent-color,var(--primary-color))));--fio-ph:var(--flowio-ph-color,var(--purple-color,var(--accent-color,var(--primary-color))));--fio-orp:var(--flowio-orp-color,var(--cyan-color,var(--info-color,var(--primary-color))));--fio-pressure:var(--flowio-pressure-color,var(--orange-color,var(--accent-color,var(--primary-color))))}
     ha-card{overflow:hidden}
     .body{padding:16px}
-    .title{margin:0 0 8px;font-size:1.05rem;font-weight:650;line-height:1.25}
-    .empty{margin:0;font-size:.82rem;color:var(--secondary-text-color)}
+    .title{margin:0 0 8px;font-size:calc(1.05rem * var(--fio-font-scale, 1.1));font-weight:650;line-height:1.25}
+    .empty{margin:0;font-size:calc(.82rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color)}
     .probes{display:flex;flex-direction:column;gap:16px}
     .probe{min-width:0}
     .probe[data-tone=water]{--fio-accent:var(--fio-water)}
@@ -76,11 +76,11 @@ class FlowioProbesCard extends LitElement {
     .probe[data-tone=pressure]{--fio-accent:var(--fio-pressure)}
     .probe-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;width:100%;min-width:0;padding:0;border:0;background:none;text-align:left;font:inherit;color:inherit;cursor:pointer;overflow-wrap:anywhere}
     .probe-head:disabled{cursor:default}
-    .probe-name{font-size:.86rem;font-weight:600;line-height:1.3}
-    .probe-value{font-size:.9rem;font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .probe-name{font-size:calc(.86rem * var(--fio-font-scale, 1.1));font-weight:600;line-height:1.3}
+    .probe-value{font-size:calc(.9rem * var(--fio-font-scale, 1.1));font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
     .bar{position:relative;height:12px;margin-top:8px;border-radius:999px;background:var(--secondary-background-color);overflow:hidden}
     .fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--fio-accent),color-mix(in srgb,var(--fio-accent) 45%,var(--ha-card-background,var(--card-background-color))));transition:width .2s ease}
-    .limits{display:flex;justify-content:space-between;margin-top:5px;font-size:.62rem;color:var(--secondary-text-color);font-variant-numeric:tabular-nums}
+    .limits{display:flex;justify-content:space-between;margin-top:5px;font-size:calc(.62rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color);font-variant-numeric:tabular-nums}
     @media (prefers-reduced-motion: reduce){.fill{transition:none}}
   `;
 }
@@ -94,7 +94,7 @@ class FlowioProbesCardEditor extends LitElement {
   setConfig(input: unknown) { this.config = normalizeProbesConfig(input); this.error = ''; }
 
   private ids(): string[] {
-    return this.config && this.hass ? probeIds(this.config, this.hass) : [];
+    return this.config ? probeIds(this.config) : [];
   }
 
   private commit(config: ProbesConfig) {
@@ -153,16 +153,14 @@ class FlowioProbesCardEditor extends LitElement {
     const labels: Record<string, string> = {
       title: 'Titre',
       entity_prefix: 'Préfixe firmware',
-      auto: 'Ajouter automatiquement les sondes découvertes',
-      entities: 'Entités ajoutées manuellement',
-      name_prefix: 'Préfixe de nom à retirer (vide = automatique)'
+      name_prefix: 'Texte à retirer devant les noms (vide = automatique)',
+      entities: 'Entités'
     };
     const schema = [
       { name: 'title', selector: { text: {} } },
       { name: 'entity_prefix', selector: { text: {} } },
-      { name: 'auto', selector: { boolean: {} } },
-      { name: 'entities', selector: { select: { multiple: true, mode: 'list', options: this.options() } } },
-      { name: 'name_prefix', selector: { text: {} } }
+      { name: 'name_prefix', selector: { text: {} } },
+      { name: 'entities', selector: { select: { multiple: true, mode: 'list', options: this.options() } } }
     ];
     return html`<p>La couleur « Auto » suit le modèle Flow.io et le thème. Choisir une pastille fixe une couleur propre à la sonde.</p>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${(field: { name: string }) => labels[field.name] ?? field.name} @value-changed=${this.changed}></ha-form>${ids.length ? html`<div class=colors><h4>Couleurs des sondes</h4>${ids.map(id => this.colorRow(id, namePrefix))}</div>` : nothing}`;
   }
@@ -172,12 +170,12 @@ class FlowioProbesCardEditor extends LitElement {
     p{color:var(--secondary-text-color);line-height:1.5}
     p[role=alert]{color:var(--error-color)}
     .colors{margin-top:16px}
-    .colors h4{margin:0 0 10px;font-size:.9rem}
+    .colors h4{margin:0 0 10px;font-size:calc(.9rem * var(--fio-font-scale, 1.1))}
     .color-row{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
-    .color-name{font-size:.8rem;font-weight:600}
+    .color-name{font-size:calc(.8rem * var(--fio-font-scale, 1.1));font-weight:600}
     .swatches{display:flex;flex-wrap:wrap;gap:6px}
     .swatch{width:26px;height:26px;padding:0;border-radius:50%;border:1px solid var(--divider-color);background:var(--swatch);cursor:pointer}
-    .swatch.auto{width:auto;padding:0 10px;border-radius:999px;background:var(--secondary-background-color);font:inherit;font-size:.72rem;color:var(--secondary-text-color)}
+    .swatch.auto{width:auto;padding:0 10px;border-radius:999px;background:var(--secondary-background-color);font:inherit;font-size:calc(.72rem * var(--fio-font-scale, 1.1));color:var(--secondary-text-color)}
     .swatch[data-selected=true]{outline:2px solid var(--primary-color);outline-offset:2px}
   `;
 }

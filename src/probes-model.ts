@@ -1,6 +1,6 @@
 import { normalizePrefix } from './entities';
 import { numericValue } from './gauge-model';
-import { available, type EntityState, type Hass } from './model';
+import { available, type EntityState } from './model';
 
 export interface ProbeScale {
   min: number;
@@ -15,7 +15,6 @@ export interface ProbesConfig {
   title: string;
   entity_prefix: string;
   entities: string[];
-  auto: boolean;
   name_prefix: string;
   colors: Record<string, string>;
   scales: Record<string, ProbeScale>;
@@ -70,8 +69,6 @@ export function normalizeProbesConfig(input: unknown): ProbesConfig {
   const raw = objectValue(input);
   const title = raw.title ?? 'Sondes';
   if (typeof title !== 'string' || !title.trim()) throw new Error('Titre invalide');
-  const auto = raw.auto ?? true;
-  if (typeof auto !== 'boolean') throw new Error('auto doit être un booléen');
   const name_prefix = raw.name_prefix ?? '';
   if (typeof name_prefix !== 'string') throw new Error('name_prefix doit être un texte');
   const supplied = raw.entities === undefined ? [] : raw.entities;
@@ -92,7 +89,6 @@ export function normalizeProbesConfig(input: unknown): ProbesConfig {
     title,
     entity_prefix: normalizePrefix(raw.entity_prefix),
     entities: [...new Set(supplied)] as string[],
-    auto,
     name_prefix,
     colors,
     scales,
@@ -100,18 +96,8 @@ export function normalizeProbesConfig(input: unknown): ProbesConfig {
   };
 }
 
-export function discoveredProbeIds(hass: Hass | undefined, prefix: string): string[] {
-  const stem = prefix ? `${prefix}_` : '';
-  const escaped = stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(`^sensor\\.${escaped}data_\\d+$`);
-  return Object.keys(hass?.states ?? {}).filter(id => pattern.test(id)).sort();
-}
-
-export function probeIds(config: ProbesConfig, hass: Hass | undefined): string[] {
-  const explicit = config.entities;
-  if (!config.auto) return explicit;
-  const extra = discoveredProbeIds(hass, config.entity_prefix).filter(id => !explicit.includes(id));
-  return [...explicit, ...extra];
+export function probeIds(config: ProbesConfig): string[] {
+  return config.entities;
 }
 
 export function probeScale(config: ProbesConfig, id: string, state?: EntityState): ProbeScale {

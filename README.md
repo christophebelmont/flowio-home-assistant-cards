@@ -136,7 +136,6 @@ Même modèle que la carte Équipements : grille de tuiles standard, nom, colonn
 type: custom:flowio-probes-card
 title: Sondes
 entity_prefix: fio
-auto: true
 entities: [sensor.fio_io_wat_tmp, sensor.fio_io_air_tmp, sensor.fio_io_orp, sensor.fio_io_psi]
 name_prefix: ''
 colors:
@@ -145,7 +144,7 @@ scales:
   sensor.fio_io_wat_tmp: { min: 0, max: 40 }
 ```
 
-La liste est dynamique : avec `auto: true`, toute sonde `sensor.<préfixe>_data_*` découverte par Home Assistant apparaît automatiquement, sans reconfiguration. `entities` ajoute des entités explicites. Le nom affiché retire le préfixe d’équipement commun (par exemple « Flow.io Waveshare »), détecté automatiquement ou forcé via `name_prefix`. Les couleurs suivent le modèle Flow.io (Eau, Air, pH, ORP, Pression) choisies automatiquement par sonde et modifiables via `colors` (nom de couleur ou code CSS personnalisé). Les barres utilisent `scales` si défini, sinon les bornes `min`/`max` de l’entité, sinon une échelle par défaut selon l’unité. Une entité absente est signalée explicitement.
+`entities` liste les sondes affichées (l’éditeur propose les capteurs du préfixe). Le nom affiché retire le préfixe d’équipement commun (par exemple « Flow.io Waveshare »), détecté automatiquement ou forcé via `name_prefix`. Les couleurs suivent le modèle Flow.io (Eau, Air, pH, ORP, Pression) choisies automatiquement par sonde et modifiables via `colors` (nom de couleur ou code CSS personnalisé). Les barres utilisent `scales` si défini, sinon les bornes `min`/`max` de l’entité, sinon une échelle par défaut selon l’unité. Une entité absente est signalée explicitement.
 
 ## Alarmes
 
@@ -191,9 +190,11 @@ hours_to_show: 12
 chart_type: line
 colors:
   sensor.fio_io_wat_tmp: '#0288d1'
+shades:
+  switch.fio_io_flt_pmp: ''
 ```
 
-Un seul graphique ApexCharts, en courbe (`line`) ou en barres (`bar`). `entities` liste les séries (l’éditeur propose toutes les entités du préfixe) ; `name_prefix` retire un texte devant les noms (vide = détection automatique) ; chaque série peut recevoir une couleur via `colors` (choix par pastilles dans l’éditeur, ou code CSS). La couleur n’est portée que par le graphique : en-tête et pied restent au thème. `hours_to_show` vaut 12 h par défaut (1–168). Avec une seule entité, l’en-tête affiche son nom, son unité et la valeur actuelle, et le pied le minimum, la moyenne des échantillons et le maximum. Les données proviennent du Recorder ; aucune valeur indisponible n’est remplacée par zéro.
+Un seul graphique ApexCharts, en courbe (`line`) ou en barres (`bar`). `entities` liste les séries (l’éditeur propose toutes les entités du préfixe) ; `name_prefix` retire un texte devant les noms (vide = détection automatique) ; chaque série peut recevoir une couleur via `colors` (choix par pastilles dans l’éditeur, ou code CSS). La couleur n’est portée que par le graphique : en-tête et pied restent au thème. Des boutons de période (6 h, 12 h, 24 h, 7 j) ajustent l’intervalle ; `hours_to_show` fixe la période par défaut (12 h, 1–168). `shades` liste des entités on/off (pdN) : leurs périodes allumées sont ombrées dans le graphique, avec une couleur pastel réglable dans l’éditeur (vide = palette par défaut). Avec une seule entité, l’en-tête affiche son nom, son unité et la valeur actuelle, et le pied le minimum, la moyenne des échantillons et le maximum. Les données proviennent du Recorder ; aucune valeur indisponible n’est remplacée par zéro.
 
 ## Historiques
 
