@@ -25,7 +25,7 @@ var ml=Object.defineProperty;var xl=(n,e)=>()=>(n&&(e=n(n=0)),e);var bl=(n,e)=>{
     </ha-card>`}};zi.properties={hass:{attribute:!1},config:{state:!0}},zi.styles=G`
     :host{display:block;container-type:inline-size;color:var(--primary-text-color);font-family:var(--ha-font-family-body,inherit);--fio-water:var(--flowio-water-color,var(--blue-color,var(--primary-color)));--fio-air:var(--flowio-air-color,var(--amber-color,var(--accent-color,var(--primary-color))));--fio-ph:var(--flowio-ph-color,var(--purple-color,var(--accent-color,var(--primary-color))));--fio-orp:var(--flowio-orp-color,var(--cyan-color,var(--info-color,var(--primary-color))));--fio-pressure:var(--flowio-pressure-color,var(--orange-color,var(--accent-color,var(--primary-color))))}
     ha-card{position:relative;overflow:hidden}
-    .body{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;padding:16px}
+    .body{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;padding:30px 16px}
     .status{flex:1 1 240px;min-width:0}
     .eyebrow{display:block;font-size:calc(.68rem * var(--fio-font-scale, 1.32));font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--secondary-text-color)}
     .status-line{display:flex;align-items:center;gap:10px;margin-top:6px}
@@ -35,9 +35,9 @@ var ml=Object.defineProperty;var xl=(n,e)=>()=>(n&&(e=n(n=0)),e);var bl=(n,e)=>{
     .status-title{font-size:calc(1.35rem * var(--fio-font-scale, 1.32));font-weight:600;line-height:1.2;overflow-wrap:anywhere}
     .status-description{margin:6px 0 0;font-size:calc(.82rem * var(--fio-font-scale, 1.32));line-height:1.45;color:var(--secondary-text-color)}
     .gauges{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px 18px;margin-inline-start:auto}
-    .gauge{display:flex;flex-direction:column;align-items:center;gap:4px;width:92px;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+    .gauge{display:flex;flex-direction:column;align-items:center;gap:4px;width:120px;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
     .gauge:disabled{cursor:default}
-    .dial{position:relative;width:84px;height:84px}
+    .dial{position:relative;width:109px;height:109px}
     .dial svg{display:block;width:100%;height:100%}
     .track{stroke:var(--divider-color);opacity:.6}
     .progress{stroke:var(--fio-accent);transition:stroke-dasharray .24s ease}
