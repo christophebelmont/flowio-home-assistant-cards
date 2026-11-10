@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { defaultSeriesColor, defaultShadeColor, GRAPH_PALETTE, normalizeGraphConfig, seriesColor, shadeColor, SHADE_PALETTE } from '../src/graph-model';
-import { onIntervals } from '../src/history-data';
+import { onIntervals, statisticsPoints } from '../src/history-data';
 
 it('applique les valeurs par défaut de la carte graphique', () => {
   const config = normalizeGraphConfig({});
@@ -43,6 +43,26 @@ it('configure les plages pdN à ombrer (pastel)', () => {
   expect(shadeColor(config, 'switch.b', 1)).toBe('#dbeafe');
   expect(() => normalizeGraphConfig({ shades: { a: 3 } })).toThrow();
   expect(() => normalizeGraphConfig({ shades: [] })).toThrow();
+});
+
+it('consolide les statistiques horaires en points', () => {
+  const start = new Date(2026, 0, 1, 0, 0).getTime();
+  const end = new Date(2026, 0, 1, 6, 0).getTime();
+  const response = {
+    'sensor.fio_io_ph': [
+      { start: new Date(2026, 0, 1, 0, 0).getTime(), end: new Date(2026, 0, 1, 1, 0).getTime(), mean: 7.1 },
+      { start: new Date(2026, 0, 1, 1, 0).getTime(), end: new Date(2026, 0, 1, 2, 0).getTime(), mean: 7.2 },
+      { start: new Date(2026, 0, 1, 2, 0).getTime(), end: new Date(2026, 0, 1, 3, 0).getTime(), min: 7.0, max: 7.4 }
+    ]
+  };
+  expect(statisticsPoints(response, start, end)).toEqual([
+    [new Date(2026, 0, 1, 0, 0).getTime(), 7.1],
+    [new Date(2026, 0, 1, 1, 0).getTime(), 7.2],
+    [new Date(2026, 0, 1, 2, 0).getTime(), 7.4]
+  ]);
+  expect(statisticsPoints({ 'sensor.a': [{ start: end + 3600000, mean: 5 }] }, start, end)).toEqual([]);
+  expect(statisticsPoints({ 'sensor.a': [{ start: start - 7200000, mean: 5 }] }, start, end)).toEqual([[start, 5]]);
+  for (const bad of [undefined, null, [], { 'sensor.a': 'x' }, { 'sensor.a': [{ mean: 5 }] }]) expect(statisticsPoints(bad, start, end)).toEqual([]);
 });
 
 it('calcule les intervalles allumés pour l’ombrage', () => {

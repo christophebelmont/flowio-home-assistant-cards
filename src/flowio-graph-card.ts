@@ -2,12 +2,17 @@ import { LitElement, html, css, nothing, type PropertyValues } from 'lit';
 import './flowio-graph-chart';
 import { available, type Hass } from './model';
 import { numericValue } from './gauge-model';
-import { historyPoints, historySummary, onIntervals, type HistoryPoint } from './history-data';
+import { historyPoints, historySummary, onIntervals, statisticsPoints, type HistoryPoint } from './history-data';
 import { commonEntityPrefix, probeDisplayName, rawProbeName } from './probes-model';
 import { GRAPH_PALETTE, SHADE_PALETTE, defaultShadeColor, normalizeGraphConfig, seriesColor, shadeColor, type GraphConfig } from './graph-model';
 
-type GraphHass = Hass & { callApi?: (method: string, path: string) => Promise<unknown> };
+type GraphHass = Hass & {
+  callApi?: (method: string, path: string) => Promise<unknown>;
+  callWS?: (message: Record<string, unknown>) => Promise<unknown>;
+};
 interface LoadedSeries { id: string; name: string; color: string; unit: string; points: HistoryPoint[]; }
+
+const HOURLY_STATISTICS_HOURS = 72;
 
 class FlowioGraphCard extends LitElement {
   static properties = { hass: { attribute: false }, config: { state: true }, loaded: { state: true }, hours: { state: true }, loading: { state: true }, error: { state: true }, start: { state: true }, end: { state: true } };
@@ -61,6 +66,29 @@ class FlowioGraphCard extends LitElement {
     return config.name_prefix || commonEntityPrefix(config.entities, hass.states);
   }
 
+  private async loadPoints(id: string, start: number, end: number): Promise<HistoryPoint[]> {
+    const hass = this.hass!, api = hass.callApi!.bind(hass);
+    if (this.hours >= HOURLY_STATISTICS_HOURS && hass.callWS && hass.states[id]?.attributes.state_class === 'measurement') {
+      try {
+        const statistics = await hass.callWS({
+          type: 'recorder/statistics_during_period',
+          start_time: new Date(start).toISOString(),
+          end_time: new Date(end).toISOString(),
+          statistic_ids: [id],
+          period: 'hour',
+          types: ['mean']
+        });
+        const points = statisticsPoints(statistics, start, end);
+        if (points.length) return points;
+      } catch {
+        // retombe sur l’historique brut
+      }
+    }
+    const query = new URLSearchParams({ filter_entity_id: id, end_time: new Date(end).toISOString(), minimal_response: '', no_attributes: '' });
+    const response = await api('GET', `history/period/${new Date(start).toISOString()}?${query}`);
+    return historyPoints(response, 'ph', hass.states[id]?.attributes.unit_of_measurement, start, end);
+  }
+
   private async load() {
     const config = this.config, hass = this.hass;
     if (!config || !hass) return;
@@ -86,9 +114,7 @@ class FlowioGraphCard extends LitElement {
       const name = probeDisplayName(rawProbeName(id, hass.states[id]), prefix);
       const color = seriesColor(config, id, index);
       try {
-        const query = new URLSearchParams({ filter_entity_id: id, end_time: new Date(end).toISOString() });
-        const response = await api('GET', `history/period/${new Date(start).toISOString()}?${query}`);
-        return { id, name, color, unit, points: historyPoints(response, 'ph', sourceUnit, start, end) };
+        return { id, name, color, unit, points: await this.loadPoints(id, start, end) };
       } catch {
         return { id, name, color, unit, points: [] };
       }
@@ -98,7 +124,7 @@ class FlowioGraphCard extends LitElement {
       const color = shadeColor(config, id, index);
       const currentOn = hass.states[id]?.state === 'on';
       try {
-        const query = new URLSearchParams({ filter_entity_id: id, end_time: new Date(end).toISOString() });
+        const query = new URLSearchParams({ filter_entity_id: id, end_time: new Date(end).toISOString(), minimal_response: '' });
         const response = await api('GET', `history/period/${new Date(start).toISOString()}?${query}`);
         return { color, intervals: onIntervals(response, start, end, currentOn) };
       } catch {
