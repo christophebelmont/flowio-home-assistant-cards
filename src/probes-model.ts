@@ -1,5 +1,5 @@
 import { normalizePrefix } from './entities';
-import { numericValue } from './gauge-model';
+import { attributeScale, numericValue } from './gauge-model';
 import { available, type EntityState } from './model';
 import { commonEntityPrefix, commonNamePrefix, displayName, entityName } from './names';
 
@@ -34,25 +34,6 @@ export interface ProbesConfig {
   items: Record<string, ProbeOverride>;
   grid_options?: Record<string, unknown>;
 }
-
-const UNIT_SCALES: Record<string, ProbeScale> = {
-  '%': { min: 0, max: 100 },
-  '°C': { min: -10, max: 50 },
-  'mV': { min: 350, max: 900 },
-  'bar': { min: 0, max: 2 },
-  'psi': { min: 0, max: 30 },
-  'L': { min: 0, max: 200 }
-};
-
-const ID_SCALES: { suffix: string; scale: ProbeScale }[] = [
-  { suffix: '_io_ph', scale: { min: 6, max: 8 } },
-  { suffix: '_io_orp', scale: { min: 350, max: 900 } },
-  { suffix: '_io_psi', scale: { min: 0, max: 2 } },
-  { suffix: '_io_wat_tmp', scale: { min: 0, max: 40 } },
-  { suffix: '_io_air_tmp', scale: { min: -10, max: 50 } }
-];
-
-const FALLBACK_SCALE: ProbeScale = { min: 0, max: 100 };
 
 function objectValue(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Configuration objet attendue');
@@ -147,18 +128,10 @@ export function probeIds(config: ProbesConfig): string[] {
   return config.entities;
 }
 
-export function probeScale(config: ProbesConfig, id: string, state?: EntityState): ProbeScale {
+export function probeScale(config: ProbesConfig, id: string, state?: EntityState): ProbeScale | undefined {
   const item = config.items[id];
   if (item?.min !== undefined && item?.max !== undefined) return { min: item.min, max: item.max };
-  const min = state?.attributes.min;
-  const max = state?.attributes.max;
-  if (typeof min === 'number' && typeof max === 'number' && Number.isFinite(min) && Number.isFinite(max) && max > min) {
-    return { min, max };
-  }
-  const byId = ID_SCALES.find(item => id.endsWith(item.suffix));
-  if (byId) return byId.scale;
-  const unit = typeof state?.attributes.unit_of_measurement === 'string' ? state.attributes.unit_of_measurement : '';
-  return UNIT_SCALES[unit] ?? FALLBACK_SCALE;
+  return attributeScale(state?.attributes);
 }
 
 export function probeValue(state?: EntityState): number | undefined {

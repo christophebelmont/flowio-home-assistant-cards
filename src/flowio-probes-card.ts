@@ -49,17 +49,17 @@ class FlowioProbesCard extends LitElement {
           <span class=probe-name>${label}</span>
           <strong class=probe-value>${!state ? 'Entité absente' : !available(state) ? 'Indisponible' : ''}</strong>
         </button>
-        <flowio-gauge .value=${value} .valueText=${state?.state} .min=${scale.min} .max=${scale.max} .variant=${'arc'} .label=${label} .unit=${unit}></flowio-gauge>
+        <flowio-gauge .value=${value} .valueText=${state?.state} .min=${scale?.min} .max=${scale?.max} .variant=${'arc'} .label=${label} .unit=${unit}></flowio-gauge>
       </div>`;
     }
-    const ratio = value !== undefined ? Math.min(100, Math.max(0, (value - scale.min) / (scale.max - scale.min) * 100)) : 0;
+    const ratio = value !== undefined && scale ? Math.min(100, Math.max(0, (value - scale.min) / (scale.max - scale.min) * 100)) : 0;
     return html`<div class=probe ${attrs} style=${custom ? `--fio-accent:${custom}` : ''}>
       <button type=button class=probe-head ?disabled=${!state} @click=${() => this.more(id)}>
         <span class=probe-name>${label}</span>
         <strong class=probe-value>${text}</strong>
       </button>
       <div class=bar aria-hidden=true><span class=fill style=${`width:${ratio}%`}></span></div>
-      <div class=limits aria-hidden=true><span>${scale.min}</span><span>${scale.max}</span></div>
+      ${scale ? html`<div class=limits aria-hidden=true><span>${scale.min}</span><span>${scale.max}</span></div>` : nothing}
     </div>`;
   }
 

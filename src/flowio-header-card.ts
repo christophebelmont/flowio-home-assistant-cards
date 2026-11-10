@@ -1,7 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { entityId, MEASUREMENTS, type Measurement } from './entities';
 import { available, type Hass } from './model';
-import { gaugeGeometry, numericValue, normalizeVisuals } from './gauge-model';
+import { attributeScale, gaugeGeometry, numericValue } from './gauge-model';
 import { iconFor, toneFor } from './visual';
 import {
   gaugeLabel,
@@ -12,7 +12,6 @@ import {
   type HeaderConfig
 } from './header-model';
 
-const SCALES = normalizeVisuals({});
 const RING_CIRCUMFERENCE = 2 * Math.PI * 46;
 const STATUS_ICONS = {
   ok: 'mdi:check-circle-outline',
@@ -40,12 +39,12 @@ class FlowioHeaderCard extends LitElement {
 
   private ring(role: Measurement) {
     const config = this.config!, state = this.hass!.states[entityId(config.entity_prefix, role)];
-    const scale = SCALES[role];
+    const scale = attributeScale(state?.attributes);
     const value = numericValue(available(state) ? state.state : undefined);
     const unit = gaugeUnit(role, state?.attributes.unit_of_measurement);
     const label = gaugeLabel(role);
     const text = value === undefined ? '—' : state!.state;
-    const geometry = gaugeGeometry(value, scale.min, scale.max, undefined, true);
+    const geometry = scale ? gaugeGeometry(value, scale.min, scale.max, undefined, true) : undefined;
     const dash = geometry && geometry.ratio > 0 ? `${geometry.progress} ${geometry.circumference}` : `0 ${RING_CIRCUMFERENCE}`;
     const rotation = geometry ? geometry.start : -90;
     return html`<button type=button class=gauge data-role=${role} data-tone=${toneFor(role)} ?disabled=${!state} @click=${() => this.more(role)}>

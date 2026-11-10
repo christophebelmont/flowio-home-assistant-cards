@@ -85,7 +85,7 @@ grid_options:
   columns: full
 ```
 
-Le statut vient des alarmes firmware (`sensor.<préfixe>_alm_active_count` et `binary_sensor.<préfixe>_alm_any_active`) : « État normal » ou « Alarme en cours ». La phrase de contexte suit le mode de filtration (`switch.<préfixe>_pl_modes_auto`) et le type de traitement (`select.<préfixe>_pl_modes_dis`). Les jauges reprennent les échelles de `flowio-pool-card` et le thème Home Assistant ; `status: false` masque le bandeau de statut. `design` vaut `standard` (thème Home Assistant) ou `flowio` (fond dégradé bleu avec vague en bas et jauges cyan/vert/orange) ; sur mobile, les jauges sont centrées horizontalement. Cette carte est autonome : elle ne modifie pas la carte piscine.
+Le statut vient des alarmes firmware (`sensor.<préfixe>_alm_active_count` et `binary_sensor.<préfixe>_alm_any_active`) : « État normal » ou « Alarme en cours ». La phrase de contexte suit le mode de filtration (`switch.<préfixe>_pl_modes_auto`) et le type de traitement (`select.<préfixe>_pl_modes_dis`). Les jauges utilisent les bornes `min`/`max` des entités et le thème Home Assistant ; sans ces bornes, l’anneau reste vide. `status: false` masque le bandeau de statut. `design` vaut `standard` (thème Home Assistant) ou `flowio` (fond dégradé bleu avec vague en bas et jauges cyan/vert/orange) ; sur mobile, les jauges sont centrées horizontalement. Cette carte est autonome : elle ne modifie pas la carte piscine.
 
 ## Filtration
 
@@ -148,7 +148,7 @@ items:
     mode: gauge
 ```
 
-`columns` règle le nombre de colonnes de la grille (1–6). `entities` liste les sondes affichées (l’éditeur propose les capteurs du préfixe, avec le préfixe d’équipement retiré). Le nom affiché retire le préfixe commun (par exemple « Flow.io Waveshare »), détecté automatiquement ou forcé via `name_prefix`. Chaque sonde peut être personnalisée via `items[<entité>]` : `name` (nom convivial), `color` (nom de modèle Flow.io ou code CSS), `min`/`max` (échelle) et `mode` (`line` = barre, ou `gauge` = jauge). Sans personnalisation, la couleur suit le modèle Flow.io, l’échelle les bornes de l’entité ou des valeurs par défaut par unité, et le mode est `line`. Les anciens champs `colors` et `scales` restent acceptés et migrés. Une entité absente est signalée explicitement.
+`columns` règle le nombre de colonnes de la grille (1–6). `entities` liste les sondes affichées (l’éditeur propose les capteurs du préfixe, avec le préfixe d’équipement retiré). Le nom affiché retire le préfixe commun (par exemple « Flow.io Waveshare »), détecté automatiquement ou forcé via `name_prefix`. Chaque sonde peut être personnalisée via `items[<entité>]` : `name` (nom convivial), `color` (nom de modèle Flow.io ou code CSS), `min`/`max` (échelle) et `mode` (`line` = barre, ou `gauge` = jauge). Sans personnalisation, la couleur suit le modèle Flow.io, l’échelle reprend les bornes `min`/`max` de l’entité (barre ou jauge laissée vide si absentes), et le mode est `line`. Les anciens champs `colors` et `scales` restent acceptés et migrés. Une entité absente est signalée explicitement.
 
 ## Alarmes
 
