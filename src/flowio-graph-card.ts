@@ -2,7 +2,7 @@ import { LitElement, html, css, nothing, type PropertyValues } from 'lit';
 import './flowio-graph-chart';
 import { available, type Hass } from './model';
 import { numericValue } from './gauge-model';
-import { historyPoints, historySummary, onIntervals, statisticsPoints, type HistoryPoint } from './history-data';
+import { consolidatePoints, consolidationMs, historyPoints, historySummary, onIntervals, statisticsPoints, type HistoryPoint } from './history-data';
 import { commonEntityPrefix, probeDisplayName, rawProbeName } from './probes-model';
 import { GRAPH_PALETTE, SHADE_PALETTE, defaultShadeColor, normalizeGraphConfig, seriesColor, shadeColor, type GraphConfig } from './graph-model';
 
@@ -11,8 +11,6 @@ type GraphHass = Hass & {
   callWS?: (message: Record<string, unknown>) => Promise<unknown>;
 };
 interface LoadedSeries { id: string; name: string; color: string; unit: string; points: HistoryPoint[]; }
-
-const HOURLY_STATISTICS_HOURS = 72;
 
 class FlowioGraphCard extends LitElement {
   static properties = { hass: { attribute: false }, config: { state: true }, loaded: { state: true }, hours: { state: true }, loading: { state: true }, error: { state: true }, start: { state: true }, end: { state: true } };
@@ -68,25 +66,26 @@ class FlowioGraphCard extends LitElement {
 
   private async loadPoints(id: string, start: number, end: number): Promise<HistoryPoint[]> {
     const hass = this.hass!, api = hass.callApi!.bind(hass);
-    if (this.hours >= HOURLY_STATISTICS_HOURS && hass.callWS && hass.states[id]?.attributes.state_class === 'measurement') {
+    const bucket = consolidationMs(this.hours);
+    if (hass.callWS && hass.states[id]?.attributes.state_class === 'measurement') {
       try {
         const statistics = await hass.callWS({
           type: 'recorder/statistics_during_period',
           start_time: new Date(start).toISOString(),
           end_time: new Date(end).toISOString(),
           statistic_ids: [id],
-          period: 'hour',
+          period: this.hours > 24 ? 'hour' : '5minute',
           types: ['mean']
         });
         const points = statisticsPoints(statistics, start, end);
-        if (points.length) return points;
+        if (points.length) return consolidatePoints(points, bucket);
       } catch {
         // retombe sur l’historique brut
       }
     }
     const query = new URLSearchParams({ filter_entity_id: id, end_time: new Date(end).toISOString(), minimal_response: '', no_attributes: '' });
     const response = await api('GET', `history/period/${new Date(start).toISOString()}?${query}`);
-    return historyPoints(response, 'ph', hass.states[id]?.attributes.unit_of_measurement, start, end);
+    return consolidatePoints(historyPoints(response, 'ph', hass.states[id]?.attributes.unit_of_measurement, start, end), bucket);
   }
 
   private async load() {

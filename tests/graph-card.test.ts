@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { defaultSeriesColor, defaultShadeColor, GRAPH_PALETTE, normalizeGraphConfig, seriesColor, shadeColor, SHADE_PALETTE } from '../src/graph-model';
-import { onIntervals, statisticsPoints } from '../src/history-data';
+import { consolidatePoints, consolidationMs, onIntervals, statisticsPoints, type HistoryPoint } from '../src/history-data';
 
 it('applique les valeurs par défaut de la carte graphique', () => {
   const config = normalizeGraphConfig({});
@@ -63,6 +63,30 @@ it('consolide les statistiques horaires en points', () => {
   expect(statisticsPoints({ 'sensor.a': [{ start: end + 3600000, mean: 5 }] }, start, end)).toEqual([]);
   expect(statisticsPoints({ 'sensor.a': [{ start: start - 7200000, mean: 5 }] }, start, end)).toEqual([[start, 5]]);
   for (const bad of [undefined, null, [], { 'sensor.a': 'x' }, { 'sensor.a': [{ mean: 5 }] }]) expect(statisticsPoints(bad, start, end)).toEqual([]);
+});
+
+it('choisit la résolution de consolidation selon la période', () => {
+  expect(consolidationMs(1)).toBe(300000);
+  expect(consolidationMs(6)).toBe(300000);
+  expect(consolidationMs(12)).toBe(600000);
+  expect(consolidationMs(24)).toBe(900000);
+  expect(consolidationMs(48)).toBe(3600000);
+  expect(consolidationMs(168)).toBe(3600000);
+});
+
+it('regroupe les points par bucket en moyenne, sans faux zéro', () => {
+  const t0 = new Date(2026, 0, 1, 0, 0).getTime();
+  const points: HistoryPoint[] = [
+    [t0, 1], [t0 + 300000, 3], [t0 + 600000, null], [t0 + 900000, 5], [t0 + 1200000, 7]
+  ];
+  expect(consolidatePoints(points, 600000)).toEqual([
+    [t0, 2], [t0 + 600000, 5], [t0 + 1200000, 7]
+  ]);
+  expect(consolidatePoints([], 600000)).toEqual([]);
+  expect(consolidatePoints([[t0, null]], 600000)).toEqual([]);
+  expect(consolidatePoints(points, 300000)).toEqual([
+    [t0, 1], [t0 + 300000, 3], [t0 + 900000, 5], [t0 + 1200000, 7]
+  ]);
 });
 
 it('calcule les intervalles allumés pour l’ombrage', () => {
