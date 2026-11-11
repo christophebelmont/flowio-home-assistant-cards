@@ -181,7 +181,7 @@ class FlowioGraphCard extends LitElement {
       ${!config.entities.length ? html`<p class=message>Choisir les entités dans l’éditeur.</p>` : nothing}
       ${this.error ? html`<p class=warning role=alert>${this.error}</p>` : nothing}
       <flowio-graph-chart .series=${this.chartSeries} .ranges=${this.ranges} .chartType=${config.chart_type} .label=${title} .unit=${single?.unit ?? ''} .start=${this.start} .end=${this.end}></flowio-graph-chart>
-      ${single && summary ? html`<div class=stats aria-label="Statistiques des échantillons disponibles"><span><small>Minimum</small><strong>${this.format(summary.min, '')}</strong></span><span><small>Moy. échant.</small><strong>${this.format(summary.mean, '')}</strong></span><span><small>Maximum</small><strong>${this.format(summary.max, '')}</strong></span></div>` : nothing}
+      ${config.show_stats && single && summary ? html`<div class=stats aria-label="Statistiques des échantillons disponibles"><span><small>Minimum</small><strong>${this.format(summary.min, '')}</strong></span><span><small>Moy. échant.</small><strong>${this.format(summary.mean, '')}</strong></span><span><small>Maximum</small><strong>${this.format(summary.max, '')}</strong></span></div>` : nothing}
     </div></ha-card>`;
   }
 
@@ -309,6 +309,7 @@ class FlowioGraphCardEditor extends LitElement {
       name_prefix: 'Texte à retirer devant les noms (vide = automatique)',
       hours_to_show: 'Période affichée (heures)',
       chart_type: 'Type de graphique',
+      show_stats: 'Afficher le bandeau Min · Moy · Max',
       entities: 'Entités affichées',
       shade_entities: 'Plages d’équipement (pdN) à ombrer quand allumé'
     };
@@ -318,6 +319,7 @@ class FlowioGraphCardEditor extends LitElement {
       { name: 'name_prefix', selector: { text: {} } },
       { name: 'hours_to_show', selector: { number: { min: 1, max: 168, step: 1, mode: 'box', unit_of_measurement: 'h' } } },
       { name: 'chart_type', selector: { select: { mode: 'dropdown', options: [{ value: 'line', label: 'Courbe' }, { value: 'bar', label: 'Barres' }] } } },
+      { name: 'show_stats', selector: { boolean: {} } },
       { name: 'entities', selector: { select: { multiple: true, mode: 'list', options: this.options() } } },
       { name: 'shade_entities', selector: { select: { multiple: true, mode: 'list', options: this.shadeOptions() } } }
     ];

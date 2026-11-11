@@ -17,6 +17,7 @@ export interface GraphConfig {
   shades: Record<string, string>;
   hours_to_show: number;
   chart_type: GraphType;
+  show_stats: boolean;
   grid_options?: Record<string, unknown>;
 }
 
@@ -31,6 +32,8 @@ export function normalizeGraphConfig(input: unknown): GraphConfig {
   }
   const chart_type = raw.chart_type ?? 'line';
   if (chart_type !== 'line' && chart_type !== 'bar') throw new Error('Type de graphique attendu : line ou bar');
+  const show_stats = raw.show_stats ?? true;
+  if (typeof show_stats !== 'boolean') throw new Error('L’affichage des statistiques doit être un booléen');
   const name_prefix = raw.name_prefix ?? '';
   if (typeof name_prefix !== 'string') throw new Error('name_prefix doit être un texte');
   const supplied = raw.entities === undefined ? [] : raw.entities;
@@ -67,6 +70,7 @@ export function normalizeGraphConfig(input: unknown): GraphConfig {
     shades,
     hours_to_show: hours,
     chart_type,
+    show_stats,
     ...(grid_options ? { grid_options: grid_options as Record<string, unknown> } : {})
   };
 }

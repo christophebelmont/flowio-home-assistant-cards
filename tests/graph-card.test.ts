@@ -8,8 +8,14 @@ it('applique les valeurs par défaut de la carte graphique', () => {
   expect(config.entity_prefix).toBe('fio');
   expect(config.hours_to_show).toBe(12);
   expect(config.chart_type).toBe('line');
+  expect(config.show_stats).toBe(true);
   expect(config.entities).toEqual([]);
   expect(config.colors).toEqual({});
+});
+
+it('accepte de masquer le bandeau Min · Moy · Max', () => {
+  expect(normalizeGraphConfig({ show_stats: false }).show_stats).toBe(false);
+  expect(() => normalizeGraphConfig({ show_stats: 'oui' })).toThrow();
 });
 
 it('accepte les entités, couleurs et le type de graphique', () => {
