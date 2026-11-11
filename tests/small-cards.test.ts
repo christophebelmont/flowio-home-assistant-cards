@@ -51,6 +51,8 @@ it('configure la carte sondes', () => {
   const config = normalizeProbesConfig({});
   expect(config.title).toBe('Sondes');
   expect(config.entities).toEqual([]);
+  expect(normalizeProbesConfig({ title: '' }).title).toBe('');
+  expect(() => normalizeProbesConfig({ title: 3 })).toThrow();
   expect(() => normalizeProbesConfig({ scales: { 'sensor.x': { min: 5, max: 5 } } })).toThrow();
 });
 

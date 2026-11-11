@@ -86,7 +86,7 @@ grid_options:
   columns: full
 ```
 
-Le statut vient des alarmes firmware (`sensor.<préfixe>_alm_active_count` et `binary_sensor.<préfixe>_alm_any_active`) : « État normal » ou « Alarme en cours ». La phrase de contexte suit le mode de filtration (`switch.<préfixe>_pl_modes_auto`) et le type de traitement (`select.<préfixe>_pl_modes_dis`). Les jauges utilisent les bornes `min`/`max` des entités et le thème Home Assistant ; sans ces bornes, l’anneau reste vide. `status: false` masque le bandeau de statut. `design` vaut `standard` (thème Home Assistant) ou `flowio` (fond dégradé bleu avec vague en bas et jauges cyan/vert/orange) ; sur mobile, les jauges sont centrées horizontalement. Cette carte est autonome : elle ne modifie pas la carte piscine.
+Le statut vient des alarmes firmware (`sensor.<préfixe>_alm_active_count` et `binary_sensor.<préfixe>_alm_any_active`) : « État normal » ou « Alarme en cours ». La phrase de contexte suit le mode de filtration (`switch.<préfixe>_pl_modes_auto`) et le type de traitement (`select.<préfixe>_pl_modes_dis`). Les jauges utilisent les bornes `min`/`max` des entités et le thème Home Assistant ; sans ces bornes, l’anneau reste vide. `status: false` masque le bandeau de statut. `design` vaut `standard` (thème Home Assistant) ou `flowio` (fond dégradé bleu avec vague en bas et jauges cyan/vert/orange) ; sur mobile, les jauges sont centrées horizontalement. Dans l’éditeur, la liste « Ordre d’affichage » (placée avant la liste des jauges) permet de classer les jauges affichées. Cette carte est autonome : elle ne modifie pas la carte piscine.
 
 ## Filtration
 
@@ -117,7 +117,7 @@ columns: 2
 entities: [switch.fio_io_flt_pmp, switch.fio_io_ph_pmp, switch.fio_io_chl_pmp]
 ```
 
-Carte encadrée contenant une grille de tuiles standard Home Assistant. Le nom, le nombre de colonnes (1–6), le texte à retirer devant les noms (ex. « Flow.io Waveshare », vide = détection automatique) et la liste des entités se règlent dans l’éditeur. Cliquer sur l’icône bascule l’entité ; cliquer ailleurs ouvre l’entité. Les couleurs suivent l’état (tuile standard). Les démarrages sensibles et les sécurités restent gérés par Flow.io.
+Carte encadrée contenant une grille de tuiles standard Home Assistant. Le nom, le nombre de colonnes (1–6), le texte à retirer devant les noms (ex. « Flow.io Waveshare », vide = détection automatique) et la liste des entités se règlent dans l’éditeur ; la liste « Ordre d’affichage » qui précède la liste de choix permet de classer les entités dans l’ordre d’apparition (monter/descendre). Cliquer sur l’icône bascule l’entité ; cliquer ailleurs ouvre l’entité. Les couleurs suivent l’état (tuile standard). Les démarrages sensibles et les sécurités restent gérés par Flow.io.
 
 ## Modes
 
@@ -129,7 +129,7 @@ columns: 2
 entities: [switch.fio_pl_modes_auto, switch.fio_pl_modes_winter, switch.fio_pl_ph_auto_mode]
 ```
 
-Même modèle que la carte Équipements : grille de tuiles standard, nom, colonnes, texte à retirer devant les noms et entités configurables. Cliquer sur l’icône bascule le mode ; cliquer ailleurs ouvre l’entité. Les modifications peuvent changer le pilotage automatique ; les sécurités restent dans Flow.io.
+Même modèle que la carte Équipements : grille de tuiles standard, nom, colonnes, texte à retirer devant les noms et entités configurables, avec la liste « Ordre d’affichage » pour classer les modes. Cliquer sur l’icône bascule le mode ; cliquer ailleurs ouvre l’entité. Les modifications peuvent changer le pilotage automatique ; les sécurités restent dans Flow.io.
 
 ## Sondes
 
@@ -149,13 +149,12 @@ items:
     mode: gauge
 ```
 
-`columns` règle le nombre de colonnes de la grille (1–6). `entities` liste les sondes affichées (l’éditeur propose les capteurs du préfixe, avec le préfixe d’équipement retiré). Le nom affiché retire le préfixe commun (par exemple « Flow.io Waveshare »), détecté automatiquement ou forcé via `name_prefix`. Chaque sonde peut être personnalisée via `items[<entité>]` : `name` (nom convivial), `color` (nom de modèle Flow.io ou code CSS), `min`/`max` (échelle) et `mode` (`line` = barre, ou `gauge` = jauge). Sans personnalisation, la couleur suit le modèle Flow.io, l’échelle reprend les bornes `min`/`max` de l’entité (barre ou jauge laissée vide si absentes), et le mode est `line`. Les anciens champs `colors` et `scales` restent acceptés et migrés. Une entité absente est signalée explicitement.
+`columns` règle le nombre de colonnes de la grille (1–6). `entities` liste les sondes affichées (l’éditeur propose les capteurs du préfixe, avec le préfixe d’équipement retiré). Le nom affiché retire le préfixe commun (par exemple « Flow.io Waveshare »), détecté automatiquement ou forcé via `name_prefix`. Chaque sonde peut être personnalisée via `items[<entité>]` : `name` (nom convivial), `color` (nom de modèle Flow.io ou code CSS), `min`/`max` (échelle) et `mode` (`line` = barre, ou `gauge` = jauge). Sans personnalisation, la couleur suit le modèle Flow.io, l’échelle reprend les bornes `min`/`max` de l’entité (barre ou jauge laissée vide si absentes), et le mode est `line`. La liste « Ordre d’affichage » (placée avant la liste de choix) permet de classer les sondes dans l’ordre d’apparition. Les anciens champs `colors` et `scales` restent acceptés et migrés. Une entité absente est signalée explicitement.
 
 ## Sonde unique
 
 ```yaml
 type: custom:flowio-probe-card
-title: Sonde
 entity_prefix: fio
 entity: sensor.fio_io_ph
 name_prefix: ''
@@ -167,7 +166,7 @@ item:
   mode: gauge
 ```
 
-Même modèle que la carte Sondes, pour une seule entité. L’éditeur propose la liste des capteurs du préfixe dans une liste déroulante (sélection unique), puis permet de régler le nom convivial, la couleur, l’échelle `min`/`max` et le mode (`line` = barre, ou `gauge` = jauge) via `item`. Sans personnalisation, la couleur suit le modèle Flow.io et l’échelle reprend les bornes `min`/`max` de l’entité (barre ou jauge laissée vide si absentes). Une entité absente est signalée explicitement.
+Même modèle que la carte Sondes, pour une seule entité. Le titre de la carte est directement le nom (modifiable) de l’entité : le préfixe commun est retiré automatiquement (ou forcé via `name_prefix`), et le champ « Nom convivial » (`item.name`) le remplace. L’éditeur propose la liste des capteurs du préfixe dans une liste déroulante (sélection unique), puis permet de régler le nom, la couleur, l’échelle `min`/`max` et le mode (`line` = barre, ou `gauge` = jauge). Sans personnalisation, la couleur suit le modèle Flow.io et l’échelle reprend les bornes `min`/`max` de l’entité (barre ou jauge laissée vide si absentes). Une entité absente est signalée explicitement.
 
 ## Alarmes
 

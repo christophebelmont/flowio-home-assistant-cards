@@ -3,11 +3,11 @@ import './flowio-gauge';
 import { available, type Hass } from './model';
 import {
   PROBE_MODES,
-  commonEntityPrefix,
   normalizeProbeConfig,
   probeDisplayName,
   probeLabel,
   probeMode,
+  probeNamePrefix,
   probeScale,
   probeValue,
   rawProbeName,
@@ -45,8 +45,7 @@ class FlowioProbeCard extends LitElement {
     if (probeMode(config) === 'gauge') {
       return html`<div class="probe gauge" data-entity=${id} data-tone=${tone} data-available=${availability} style=${custom ? `--fio-accent:${custom}` : ''}>
         <button type=button class=probe-head ?disabled=${!state} @click=${() => this.more(id)}>
-          <span class=probe-name>${label}</span>
-          <strong class=probe-value>${!state ? 'Entité absente' : !available(state) ? 'Indisponible' : ''}</strong>
+          <strong class=probe-value>${available(state) ? '' : !state ? 'Entité absente' : 'Indisponible'}</strong>
         </button>
         <flowio-gauge .value=${value} .valueText=${state?.state} .min=${scale?.min} .max=${scale?.max} .variant=${'arc'} .label=${label} .unit=${unit}></flowio-gauge>
       </div>`;
@@ -54,7 +53,6 @@ class FlowioProbeCard extends LitElement {
     const ratio = value !== undefined && scale ? Math.min(100, Math.max(0, (value - scale.min) / (scale.max - scale.min) * 100)) : 0;
     return html`<div class=probe data-entity=${id} data-tone=${tone} data-available=${availability} style=${custom ? `--fio-accent:${custom}` : ''}>
       <button type=button class=probe-head ?disabled=${!state} @click=${() => this.more(id)}>
-        <span class=probe-name>${label}</span>
         <strong class=probe-value>${text}</strong>
       </button>
       <div class=bar aria-hidden=true><span class=fill style=${`width:${ratio}%`}></span></div>
@@ -66,10 +64,11 @@ class FlowioProbeCard extends LitElement {
     const config = this.config, hass = this.hass;
     if (!config || !hass) return html`<ha-card><div class=body>En attente de Home Assistant…</div></ha-card>`;
     const id = config.entity;
-    const prefix = config.name_prefix || commonEntityPrefix(id ? [id] : [], hass.states);
+    const state = id ? hass.states[id] : undefined;
+    const prefix = probeNamePrefix(config, hass.states);
+    const label = id ? probeLabel(config, state, prefix) : '';
     return html`<ha-card><div class=body>
-      <h3 class=title>${config.title}</h3>
-      ${id ? html`<div class=probes>${this.probe(id, prefix)}</div>` : html`<p class=empty>Aucune entité sélectionnée.</p>`}
+      ${id ? html`${label ? html`<h3 class=title>${label}</h3>` : nothing}<div class=probes>${this.probe(id, prefix)}</div>` : html`<p class=empty>Aucune entité sélectionnée.</p>`}
     </div></ha-card>`;
   }
 
@@ -145,16 +144,16 @@ class FlowioProbeCardEditor extends LitElement {
   }
 
   private options(): { value: string; label: string }[] {
-    if (!this.hass) return [];
-    const stem = this.config?.entity_prefix ? `${this.config.entity_prefix}_` : '';
+    if (!this.hass || !this.config) return [];
+    const stem = this.config.entity_prefix ? `${this.config.entity_prefix}_` : '';
     const ids = Object.keys(this.hass.states).filter(id => id.startsWith(`sensor.${stem}`)).sort();
-    const prefix = this.config?.name_prefix || commonEntityPrefix(ids, this.hass.states);
+    const prefix = probeNamePrefix(this.config, this.hass.states);
     return ids.map(id => ({ value: id, label: `${probeDisplayName(rawProbeName(id, this.hass!.states[id]), prefix)} · ${id}` }));
   }
 
   private item() {
     const config = this.config!, id = config.entity, item = config.item;
-    const label = probeLabel(config, this.hass!.states[id], config.name_prefix || commonEntityPrefix([id], this.hass!.states));
+    const label = probeLabel(config, this.hass!.states[id], probeNamePrefix(config, this.hass!.states));
     const selected = item.color ?? '';
     return html`<div class=items>
       <label class=field><span>Nom convivial</span><input type=text .value=${item.name ?? ''} placeholder=${label} @change=${(event: Event) => this.setItem({ name: (event.target as HTMLInputElement).value })}></label>
@@ -170,13 +169,11 @@ class FlowioProbeCardEditor extends LitElement {
   render() {
     if (!this.config || !this.hass) return nothing;
     const labels: Record<string, string> = {
-      title: 'Titre',
       entity_prefix: 'Préfixe firmware',
       name_prefix: 'Texte à retirer devant les noms (vide = automatique)',
       entity: 'Entité'
     };
     const schema = [
-      { name: 'title', selector: { text: {} } },
       { name: 'entity_prefix', selector: { text: {} } },
       { name: 'name_prefix', selector: { text: {} } },
       { name: 'entity', selector: { select: { mode: 'dropdown', options: this.options() } } }

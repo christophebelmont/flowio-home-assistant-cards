@@ -1,5 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import './flowio-gauge';
+import './order-list';
+import { mergeOrder, orderItems } from './order-list';
 import { available, type Hass } from './model';
 import {
   PROBE_MODES,
@@ -69,7 +71,7 @@ class FlowioProbesCard extends LitElement {
     const ids = probeIds(config);
     const prefix = config.name_prefix || commonEntityPrefix(ids, hass.states);
     return html`<ha-card><div class=body>
-      <h3 class=title>${config.title}</h3>
+      ${config.title ? html`<h3 class=title>${config.title}</h3>` : nothing}
       ${ids.length ? html`<div class=probes style=${`--columns:${config.columns}`}>${ids.map(id => this.probe(id, prefix))}</div>`
         : html`<p class=empty>Aucune entité sélectionnée.</p>`}
     </div></ha-card>`;
@@ -121,7 +123,17 @@ class FlowioProbesCardEditor extends LitElement {
     if (!this.config) return;
     try {
       const value = (event.detail?.value ?? {}) as Record<string, unknown>;
-      this.commit(normalizeProbesConfig({ ...value, items: this.config.items }));
+      const selected = Array.isArray(value.entities) ? value.entities as string[] : this.config.entities;
+      this.commit(normalizeProbesConfig({ ...value, entities: mergeOrder(this.config.entities, selected), items: this.config.items }));
+    } catch (error) {
+      this.error = error instanceof Error ? error.message : 'Configuration invalide';
+    }
+  }
+
+  private reorder(order: string[]) {
+    if (!this.config) return;
+    try {
+      this.commit(normalizeProbesConfig({ ...this.config, entities: order }));
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'Configuration invalide';
     }
@@ -193,10 +205,12 @@ class FlowioProbesCardEditor extends LitElement {
       { name: 'title', selector: { text: {} } },
       { name: 'entity_prefix', selector: { text: {} } },
       { name: 'name_prefix', selector: { text: {} } },
-      { name: 'columns', selector: { number: { min: 1, max: 6, step: 1, mode: 'box' } } },
-      { name: 'entities', selector: { select: { multiple: true, mode: 'list', options: this.options() } } }
+      { name: 'columns', selector: { number: { min: 1, max: 6, step: 1, mode: 'box' } } }
     ];
-    return html`<p>Chaque sonde peut être personnalisée (nom, couleur, min/max, mode). « Auto » reprend la détection Flow.io.</p>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${(field: { name: string }) => labels[field.name] ?? field.name} @value-changed=${this.changed}></ha-form>${ids.length ? html`<div class=items><h4>Sondes</h4>${ids.map(id => this.item(id, prefix))}</div>` : nothing}`;
+    const entitySchema = [{ name: 'entities', selector: { select: { multiple: true, mode: 'list', options: this.options() } } }];
+    const computeLabel = (field: { name: string }) => labels[field.name] ?? field.name;
+    const items = orderItems(ids, this.hass.states, prefix);
+    return html`<p>Chaque sonde peut être personnalisée (nom, couleur, min/max, mode). « Auto » reprend la détection Flow.io.</p>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${computeLabel} @value-changed=${this.changed}></ha-form><flowio-order-list .items=${items} @order-changed=${(event: CustomEvent) => this.reorder(event.detail.order)}></flowio-order-list><ha-form .hass=${this.hass} .data=${this.config} .schema=${entitySchema} .computeLabel=${computeLabel} @value-changed=${this.changed}></ha-form>${ids.length ? html`<div class=items><h4>Sondes</h4>${ids.map(id => this.item(id, prefix))}</div>` : nothing}`;
   }
 
   static styles = css`

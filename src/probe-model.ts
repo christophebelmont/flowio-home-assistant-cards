@@ -22,7 +22,6 @@ export type { ProbeMode, ProbeOverride, ProbeScale, ProbeTone };
 
 export interface ProbeConfig {
   type: string;
-  title: string;
   entity_prefix: string;
   entity: string;
   name_prefix: string;
@@ -37,8 +36,6 @@ function objectValue(value: unknown): Record<string, unknown> {
 
 export function normalizeProbeConfig(input: unknown): ProbeConfig {
   const raw = objectValue(input);
-  const title = raw.title ?? 'Sonde';
-  if (typeof title !== 'string' || !title.trim()) throw new Error('Titre invalide');
   const name_prefix = raw.name_prefix ?? '';
   if (typeof name_prefix !== 'string') throw new Error('name_prefix doit être un texte');
   const entity = raw.entity ?? '';
@@ -50,7 +47,6 @@ export function normalizeProbeConfig(input: unknown): ProbeConfig {
   }
   return {
     type: 'custom:flowio-probe-card',
-    title,
     entity_prefix: normalizePrefix(raw.entity_prefix),
     entity,
     name_prefix,
@@ -59,10 +55,17 @@ export function normalizeProbeConfig(input: unknown): ProbeConfig {
   };
 }
 
+export function probeNamePrefix(config: ProbeConfig, states: Record<string, EntityState>): string {
+  if (config.name_prefix) return config.name_prefix;
+  const stem = config.entity_prefix ? `${config.entity_prefix}_` : '';
+  const ids = Object.keys(states).filter(id => id.startsWith(`sensor.${stem}`));
+  return commonEntityPrefix(ids, states);
+}
+
 function asProbes(config: ProbeConfig): ProbesConfig {
   return {
     type: config.type,
-    title: config.title,
+    title: '',
     entity_prefix: config.entity_prefix,
     entities: config.entity ? [config.entity] : [],
     name_prefix: config.name_prefix,

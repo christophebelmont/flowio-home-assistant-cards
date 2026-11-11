@@ -1,19 +1,32 @@
 import { expect, it } from 'vitest';
-import { normalizeProbeConfig, probeLabel, probeMode, probeScale, probeValue, resolveProbeColor } from '../src/probe-model';
+import { normalizeProbeConfig, probeLabel, probeMode, probeNamePrefix, probeScale, probeValue, resolveProbeColor } from '../src/probe-model';
 
 const state = (value: string, attributes: Record<string, unknown> = {}) => ({ state: value, attributes });
 
 it('configure la carte sonde unique', () => {
   const config = normalizeProbeConfig({});
-  expect(config.title).toBe('Sonde');
   expect(config.entity).toBe('');
   expect(config.item).toEqual({});
-  const custom = normalizeProbeConfig({ title: 'Redox', entity_prefix: 'fio', entity: 'sensor.fio_io_orp', name_prefix: 'Flow.io ', item: { name: 'Redox', mode: 'gauge', color: '#8e24aa', min: 400, max: 1000 } });
+  const custom = normalizeProbeConfig({ entity_prefix: 'fio', entity: 'sensor.fio_io_orp', name_prefix: 'Flow.io ', item: { name: 'Redox', mode: 'gauge', color: '#8e24aa', min: 400, max: 1000 } });
   expect(custom.entity).toBe('sensor.fio_io_orp');
   expect(custom.item).toEqual({ name: 'Redox', mode: 'gauge', color: '#8e24aa', min: 400, max: 1000 });
-  for (const input of [{ title: '' }, { entity: 3 }, { name_prefix: 3 }, { item: { mode: 'pie' } }, { item: { min: 10, max: 5 } }, { item: { name: 3 } }, { grid_options: [] }]) {
+  for (const input of [{ entity: 3 }, { name_prefix: 3 }, { item: { mode: 'pie' } }, { item: { min: 10, max: 5 } }, { item: { name: 3 } }, { grid_options: [] }]) {
     expect(() => normalizeProbeConfig(input)).toThrow();
   }
+});
+
+it('détecte automatiquement le préfixe à retirer sur une entité unique', () => {
+  const states = {
+    'sensor.fio_io_ph': state('7.2', { friendly_name: 'Flow.io Waveshare pH' }),
+    'sensor.fio_io_orp': state('710', { friendly_name: 'Flow.io Waveshare ORP' }),
+    'sensor.fio_io_wat_tmp': state('27', { friendly_name: 'Flow.io Waveshare Eau' })
+  };
+  const config = normalizeProbeConfig({ entity_prefix: 'fio', entity: 'sensor.fio_io_ph' });
+  expect(probeNamePrefix(config, states)).toBe('Flow.io Waveshare ');
+  expect(probeLabel(config, states['sensor.fio_io_ph'], probeNamePrefix(config, states))).toBe('pH');
+  const forced = normalizeProbeConfig({ entity_prefix: 'fio', entity: 'sensor.fio_io_ph', name_prefix: 'Flow.io ' });
+  expect(probeNamePrefix(forced, states)).toBe('Flow.io ');
+  expect(probeLabel(forced, states['sensor.fio_io_ph'], 'Flow.io ')).toBe('Waveshare pH');
 });
 
 it('lit nom, mode, échelle et couleur de la sonde unique', () => {

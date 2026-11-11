@@ -31,6 +31,7 @@ class FlowioGraphCard extends LitElement {
   static getConfigElement() { return document.createElement('flowio-graph-card-editor'); }
   static getStubConfig(): GraphConfig { return normalizeGraphConfig({}); }
   getCardSize() { return 6; }
+  getGridOptions() { return { columns: 6, min_columns: 3 }; }
 
   setConfig(input: unknown) {
     this.config = normalizeGraphConfig(input);

@@ -81,7 +81,7 @@ export function probeOverride(value: unknown): ProbeOverride {
 export function normalizeProbesConfig(input: unknown): ProbesConfig {
   const raw = objectValue(input);
   const title = raw.title ?? 'Sondes';
-  if (typeof title !== 'string' || !title.trim()) throw new Error('Titre invalide');
+  if (typeof title !== 'string') throw new Error('Titre invalide');
   const name_prefix = raw.name_prefix ?? '';
   if (typeof name_prefix !== 'string') throw new Error('name_prefix doit être un texte');
   const columns = raw.columns ?? 2;

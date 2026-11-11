@@ -1,7 +1,9 @@
 import { LitElement, html, css, nothing, type PropertyValues } from 'lit';
+import './order-list';
 import { normalizePrefix } from './entities';
 import type { Hass } from './model';
 import { commonEntityPrefix, displayName, entityName } from './names';
+import { mergeOrder, orderItems } from './order-list';
 
 export interface TileGridConfig {
   type: string;
@@ -150,12 +152,28 @@ export abstract class FlowioTileGridEditor extends LitElement {
 
   setConfig(input: unknown) { this.config = this.normalizeConfig(input); this.error = ''; }
 
+  private commit(config: TileGridConfig) {
+    this.config = config;
+    this.error = '';
+    this.dispatchEvent(new CustomEvent('config-changed', { detail: { config }, bubbles: true, composed: true }));
+  }
+
   private changed(event: CustomEvent) {
     event.stopPropagation();
+    if (!this.config) return;
     try {
-      this.config = this.normalizeConfig(event.detail.value);
-      this.error = '';
-      this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config }, bubbles: true, composed: true }));
+      const value = (event.detail?.value ?? {}) as Record<string, unknown>;
+      const selected = Array.isArray(value.entities) ? value.entities as string[] : this.config.entities;
+      this.commit(this.normalizeConfig({ ...value, entities: mergeOrder(this.config.entities, selected) }));
+    } catch (error) {
+      this.error = error instanceof Error ? error.message : 'Configuration invalide';
+    }
+  }
+
+  private reorder(order: string[]) {
+    if (!this.config) return;
+    try {
+      this.commit(this.normalizeConfig({ ...this.config, entities: order }));
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'Configuration invalide';
     }
@@ -175,11 +193,14 @@ export abstract class FlowioTileGridEditor extends LitElement {
       { name: 'title', selector: { text: {} } },
       { name: 'columns', selector: { number: { min: 1, max: 6, step: 1, mode: 'box' } } },
       { name: 'entity_prefix', selector: { text: {} } },
-      { name: 'name_prefix', selector: { text: {} } },
-      { name: 'entities', selector: { select: { multiple: true, mode: 'list', options: this.options() } } }
+      { name: 'name_prefix', selector: { text: {} } }
     ];
+    const entitySchema = [{ name: 'entities', selector: { select: { multiple: true, mode: 'list', options: this.options() } } }];
     const labels: Record<string, string> = { title: 'Nom', columns: 'Colonnes', entity_prefix: 'Préfixe firmware', name_prefix: 'Texte à retirer devant les noms (vide = automatique)', entities: 'Entités' };
-    return html`<p>Tuiles standard Home Assistant : cliquer sur l’icône bascule l’entité, cliquer ailleurs ouvre l’entité.</p>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${(field: { name: string }) => labels[field.name] ?? field.name} @value-changed=${this.changed}></ha-form>`;
+    const prefix = this.config.name_prefix || commonEntityPrefix(this.config.entities, this.hass.states);
+    const items = orderItems(this.config.entities, this.hass.states, prefix);
+    const computeLabel = (field: { name: string }) => labels[field.name] ?? field.name;
+    return html`<p>Tuiles standard Home Assistant : cliquer sur l’icône bascule l’entité, cliquer ailleurs ouvre l’entité.</p>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${computeLabel} @value-changed=${this.changed}></ha-form><flowio-order-list .items=${items} @order-changed=${(event: CustomEvent) => this.reorder(event.detail.order)}></flowio-order-list><ha-form .hass=${this.hass} .data=${this.config} .schema=${entitySchema} .computeLabel=${computeLabel} @value-changed=${this.changed}></ha-form>`;
   }
 
   static styles = css`:host{display:block}p{color:var(--secondary-text-color);line-height:1.5}p[role=alert]{color:var(--error-color)}`;

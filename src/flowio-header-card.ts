@@ -1,4 +1,6 @@
 import { LitElement, html, css, nothing } from 'lit';
+import './order-list';
+import { mergeOrder } from './order-list';
 import { entityId, MEASUREMENTS, type Measurement } from './entities';
 import { available, type Hass } from './model';
 import { attributeScale, gaugeGeometry, numericValue } from './gauge-model';
@@ -141,12 +143,28 @@ class FlowioHeaderCardEditor extends LitElement {
 
   setConfig(input: unknown) { this.config = normalizeHeaderConfig(input); this.error = ''; }
 
+  private commit(config: HeaderConfig) {
+    this.config = config;
+    this.error = '';
+    this.dispatchEvent(new CustomEvent('config-changed', { detail: { config }, bubbles: true, composed: true }));
+  }
+
   private changed(event: CustomEvent) {
     event.stopPropagation();
+    if (!this.config) return;
     try {
-      this.config = normalizeHeaderConfig(event.detail.value);
-      this.error = '';
-      this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config }, bubbles: true, composed: true }));
+      const value = (event.detail?.value ?? {}) as Record<string, unknown>;
+      const selected = Array.isArray(value.measurements) ? value.measurements as Measurement[] : this.config.measurements;
+      this.commit(normalizeHeaderConfig({ ...value, measurements: mergeOrder(this.config.measurements, selected) }));
+    } catch (error) {
+      this.error = error instanceof Error ? error.message : 'Configuration invalide';
+    }
+  }
+
+  private reorder(order: string[]) {
+    if (!this.config) return;
+    try {
+      this.commit(normalizeHeaderConfig({ ...this.config, measurements: order }));
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'Configuration invalide';
     }
@@ -158,9 +176,9 @@ class FlowioHeaderCardEditor extends LitElement {
       { name: 'title', selector: { text: {} } },
       { name: 'entity_prefix', selector: { text: {} } },
       { name: 'design', selector: { select: { mode: 'dropdown', options: [{ value: 'standard', label: 'Standard' }, { value: 'flowio', label: 'Flow.io' }] } } },
-      { name: 'status', selector: { boolean: {} } },
-      { name: 'measurements', selector: { select: { multiple: true, mode: 'list', options: MEASUREMENTS.map(value => ({ value, label: gaugeLabel(value) })) } } }
+      { name: 'status', selector: { boolean: {} } }
     ];
+    const measurementSchema = [{ name: 'measurements', selector: { select: { multiple: true, mode: 'list', options: MEASUREMENTS.map(value => ({ value, label: gaugeLabel(value) })) } } }];
     const labels: Record<string, string> = {
       title: 'Libellé',
       entity_prefix: 'Préfixe firmware',
@@ -168,7 +186,9 @@ class FlowioHeaderCardEditor extends LitElement {
       status: 'Afficher l’état du bassin',
       measurements: 'Jauges affichées'
     };
-    return html`${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${(field: { name: string }) => labels[field.name] ?? field.name} @value-changed=${this.changed}></ha-form>`;
+    const computeLabel = (field: { name: string }) => labels[field.name] ?? field.name;
+    const items = this.config.measurements.map(role => ({ value: role, label: gaugeLabel(role) }));
+    return html`${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${computeLabel} @value-changed=${this.changed}></ha-form><flowio-order-list .items=${items} @order-changed=${(event: CustomEvent) => this.reorder(event.detail.order)}></flowio-order-list><ha-form .hass=${this.hass} .data=${this.config} .schema=${measurementSchema} .computeLabel=${computeLabel} @value-changed=${this.changed}></ha-form>`;
   }
 
   static styles = css`:host{display:block}p[role=alert]{color:var(--error-color)}`;
