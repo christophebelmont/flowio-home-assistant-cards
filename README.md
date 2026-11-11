@@ -75,6 +75,8 @@ Pour compatibilité, l’ancien champ `display.treatment` n’empêche pas le ch
 
 ## Entête
 
+![Carte Flow.io — Entête « État du bassin »](docs/flowio-header-card.png)
+
 ```yaml
 type: custom:flowio-header-card
 title: État du bassin
@@ -90,6 +92,8 @@ Le statut vient des alarmes firmware (`sensor.<préfixe>_alm_active_count` et `b
 
 ## Filtration
 
+![Carte Flow.io — Filtration](docs/flowio-filtration-card.png)
+
 ```yaml
 type: custom:flowio-filtration-card
 title: Filtration
@@ -100,6 +104,8 @@ La carte affiche la plage de filtration calculée par Flow.io depuis `sensor.<pr
 
 ## Traitement
 
+![Carte Flow.io — Traitement (Chlore / Brome)](docs/flowio-treatment-card.png)
+
 ```yaml
 type: custom:flowio-treatment-card
 entity_prefix: fio
@@ -108,6 +114,8 @@ entity_prefix: fio
 La carte lit le type de traitement depuis `select.<préfixe>_pl_modes_dis` et affiche uniquement les informations du traitement actif ; elle ne permet pas de le modifier. Chlore/Brome : `switch.<préfixe>_pl_dis_auto`, `number.<préfixe>_pl_dis_setpoint`, `number.<préfixe>_pl_dis_window`. Électrolyse : `select.<préfixe>_pl_swg_ctrl`, `number.<préfixe>_pl_swg_dly_elec`, `number.<préfixe>_pl_swg_min_temp`. Oxygène actif : `number.<préfixe>_pl_o2_vol`, `number.<préfixe>_pl_o2_dose`, `number.<préfixe>_pl_o2_split`, `sensor.<préfixe>_pl_o2_pending`. Une entité absente est signalée explicitement, jamais remplacée par zéro.
 
 ## Équipements
+
+![Carte Flow.io — Équipements](docs/flowio-equipment-card.png)
 
 ```yaml
 type: custom:flowio-equipment-card
@@ -121,6 +129,8 @@ Carte encadrée contenant une grille de tuiles standard Home Assistant. Le nom, 
 
 ## Modes
 
+![Carte Flow.io — Modes](docs/flowio-modes-card.png)
+
 ```yaml
 type: custom:flowio-modes-card
 title: Modes
@@ -132,6 +142,8 @@ entities: [switch.fio_pl_modes_auto, switch.fio_pl_modes_winter, switch.fio_pl_p
 Même modèle que la carte Équipements : grille de tuiles standard, nom, colonnes, texte à retirer devant les noms et entités configurables, avec la liste « Ordre d’affichage » pour classer les modes. Cliquer sur l’icône bascule le mode ; cliquer ailleurs ouvre l’entité. Les modifications peuvent changer le pilotage automatique ; les sécurités restent dans Flow.io.
 
 ## Sondes
+
+![Carte Flow.io — Sondes (jauges des cuves)](docs/flowio-probes-card.png)
 
 ```yaml
 type: custom:flowio-probes-card
@@ -170,6 +182,8 @@ Même modèle que la carte Sondes, pour une seule entité. Le titre de la carte 
 
 ## Alarmes
 
+![Carte Flow.io — Alarmes](docs/flowio-alarms-card.png)
+
 ```yaml
 type: custom:flowio-alarms-card
 title: Alarmes
@@ -179,6 +193,8 @@ entity_prefix: fio
 Synthèse des alarmes surveillées (`binary_sensor.<préfixe>_alm_*_active`) : nombre total et état, puis liste des alarmes actives. `name_prefix` retire un texte devant les noms (vide = détection automatique). Aucune alarme n’est acquittée par cette carte.
 
 ## État système
+
+![Carte Flow.io — État système](docs/flowio-status-card.png)
 
 ```yaml
 type: custom:flowio-status-card
@@ -191,6 +207,8 @@ Informations réseau et système du contrôleur : adresse IP/MAC, signal Wi-Fi, 
 
 ## Forçage
 
+![Carte Flow.io — Forçage temporaire](docs/flowio-override-card.png)
+
 ```yaml
 type: custom:flowio-override-card
 title: Forçage temporaire
@@ -202,6 +220,10 @@ durations: [5, 15, 30, 60]
 Force l’équipement choisi en marche ou à l’arrêt pendant une durée sélectionnée (5, 15, 30, 60 min), puis termine le forçage. L’équipement se choisit dans la liste publiée par Flow.io (`select.<préfixe>_pdm_ovr_target`) ; les durées sont modifiables. Les commandes demandent confirmation et Flow.io reste responsable des sécurités.
 
 ## Graphique
+
+| Courbe (Temperature) | Courbe (ORP) |
+|---|---|
+| ![Graphique Flow.io — Température](docs/flowio-graph-card.png) | ![Graphique Flow.io — ORP](docs/flowio-graph-card-orp.png) |
 
 ```yaml
 type: custom:flowio-graph-card
