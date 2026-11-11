@@ -5,7 +5,7 @@ for(const width of [390,1100])test(`qualité et équipements en haut, horaires e
   await page.evaluate(items=>{const d=(window as any).demo;d.config.display.timing=items;d.config.display.operations=[];d.apply();},items);
   const timings=page.locator('flowio-pool-card flowio-timing');await expect(timings).toHaveCount(items.length?1:0);await expect(page.getByRole('heading',{name:'Horaires & durées',exact:true})).toHaveCount(items.length?1:0);
   await expect(page.getByRole('heading',{name:'Mesures',exact:true})).toHaveCount(0);await expect(page.locator('flowio-pool-card .dashboard-top .section-heading').first()).toHaveText('Qualité de l’eau');
-  await expect(page.locator('flowio-pool-card .measurement-section h3')).toHaveText(['Qualité de l’eau','Pression']);
+  await expect(page.locator('flowio-pool-card .measurement-section h3')).toHaveText(['Qualité de l’eau','Pression','Température']);
   if(items.length){await expect(timings.locator('[data-timing]')).toHaveCount(items.length);for(const item of items)await expect(timings.locator(`[data-timing=${item}]`)).toHaveCount(1);const heading=await timings.locator('.section-heading').boundingBox(),t=await timings.boundingBox(),top=await page.locator('flowio-pool-card .dashboard-top').boundingBox();expect(heading).not.toBeNull();expect(t).not.toBeNull();expect(top).not.toBeNull();expect(heading!.y-(top!.y+top!.height)).toBeCloseTo(4,0);expect(top!.y+top!.height).toBeLessThanOrEqual(t!.y);}
  }
 });
