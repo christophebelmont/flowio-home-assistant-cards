@@ -26,6 +26,7 @@ export const poolStyles=css`
 .fio-card .measure.gauge-tile::before{display:none}.fio-card .measure.gauge-tile:hover{transform:none;box-shadow:none}
 .fio-card .grid[data-group=tanks]{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-start;align-items:start}
 .fio-card .measurement-section .measurement-group,.fio-card .body .grid[data-group=tanks]{border-top:2px solid color-mix(in srgb,var(--fio-water) 55%,var(--fio-trim));border-radius:13px;background:var(--fio-panel)}
+.fio-card .measurement-section .measurement-group[data-measurement-group=measures]{border:0;background:transparent;border-radius:0;box-shadow:none;padding:0}
 @container(max-width:700px){:host>.hero{padding-inline-start:16px}.fio-card{--fio-tile-size:min(180px,calc((100cqi - 88px)/2))}}
 .fio-card .equipment-pane{container-type:inline-size}.fio-card .equipment-pane .equipment-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}
 .fio-card .control{box-sizing:border-box;min-height:76px;padding:4px 0;gap:10px;border:0;border-bottom:1px solid color-mix(in srgb,var(--divider-color) 72%,var(--fio-accent));border-radius:0;background:transparent;box-shadow:none}
