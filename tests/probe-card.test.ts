@@ -37,6 +37,9 @@ it('lit nom, mode, échelle et couleur de la sonde unique', () => {
   expect(resolveProbeColor(config, state('7.2', {}))).toEqual({ tone: 'ph', custom: '#8e24aa' });
   const auto = normalizeProbeConfig({ entity: 'sensor.fio_io_ph' });
   expect(probeLabel(auto, state('7.2', { friendly_name: 'Flow.io Waveshare pH' }), 'Flow.io Waveshare ')).toBe('pH');
+  const cleared = normalizeProbeConfig({ entity: 'sensor.fio_io_ph', item: { name: '' } });
+  expect(cleared.item.name).toBe('');
+  expect(probeLabel(cleared, state('7.2', { friendly_name: 'Flow.io Waveshare pH' }), 'Flow.io Waveshare ')).toBe('');
   expect(probeMode(auto)).toBe('line');
   expect(probeScale(auto, state('7.2', { min: 6.5, max: 8.2 }))).toEqual({ min: 6.5, max: 8.2 });
   expect(probeScale(auto, state('7.2', {}))).toBeUndefined();

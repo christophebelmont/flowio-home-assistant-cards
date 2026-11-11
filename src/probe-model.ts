@@ -75,6 +75,7 @@ function asProbes(config: ProbeConfig): ProbesConfig {
 }
 
 export function probeLabel(config: ProbeConfig, state: EntityState | undefined, prefix: string): string {
+  if (config.item.name !== undefined) return config.item.name;
   return multiLabel(asProbes(config), config.entity, state, prefix);
 }
 

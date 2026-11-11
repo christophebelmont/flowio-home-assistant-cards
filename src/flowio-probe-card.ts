@@ -35,7 +35,7 @@ class FlowioProbeCard extends LitElement {
 
   private probe(id: string, prefix: string) {
     const config = this.config!, state = this.hass!.states[id];
-    const label = probeLabel(config, state, prefix);
+    const label = probeLabel(config, state, prefix) || probeDisplayName(rawProbeName(id, state), prefix);
     const unit = typeof state?.attributes.unit_of_measurement === 'string' ? state.attributes.unit_of_measurement : '';
     const value = probeValue(state);
     const scale = probeScale(config, state);
@@ -128,7 +128,7 @@ class FlowioProbeCardEditor extends LitElement {
     try {
       const next: Record<string, unknown> = { ...this.config.item };
       for (const [key, value] of Object.entries(patch)) {
-        if (value === '' || value === undefined) delete next[key];
+        if (value === undefined || (value === '' && key !== 'name')) delete next[key];
         else next[key] = value;
       }
       this.commit(normalizeProbeConfig({ ...this.config, item: next }));

@@ -54,7 +54,7 @@ export function probeOverride(value: unknown): ProbeOverride {
   const result: ProbeOverride = {};
   if (raw.name !== undefined) {
     if (typeof raw.name !== 'string') throw new Error('Le nom doit être un texte');
-    if (raw.name) result.name = raw.name;
+    result.name = raw.name;
   }
   if (raw.color !== undefined) {
     if (typeof raw.color !== 'string') throw new Error('La couleur doit être un texte');
@@ -80,8 +80,11 @@ export function probeOverride(value: unknown): ProbeOverride {
 
 export function normalizeProbesConfig(input: unknown): ProbesConfig {
   const raw = objectValue(input);
-  const title = raw.title ?? 'Sondes';
-  if (typeof title !== 'string') throw new Error('Titre invalide');
+  let title: string;
+  if (!('title' in raw)) title = 'Sondes';
+  else if (raw.title === undefined) title = '';
+  else if (typeof raw.title === 'string') title = raw.title;
+  else throw new Error('Titre invalide');
   const name_prefix = raw.name_prefix ?? '';
   if (typeof name_prefix !== 'string') throw new Error('name_prefix doit être un texte');
   const columns = raw.columns ?? 2;
