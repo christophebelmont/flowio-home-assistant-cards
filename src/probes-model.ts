@@ -49,7 +49,7 @@ function scaleValue(value: unknown): ProbeScale {
   return { min, max };
 }
 
-function probeOverride(value: unknown): ProbeOverride {
+export function probeOverride(value: unknown): ProbeOverride {
   const raw = objectValue(value);
   const result: ProbeOverride = {};
   if (raw.name !== undefined) {

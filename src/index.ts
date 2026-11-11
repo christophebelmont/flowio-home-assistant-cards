@@ -4,6 +4,7 @@ import './flowio-treatment-card';
 import './flowio-equipment-card';
 import './flowio-modes-card';
 import './flowio-probes-card';
+import './flowio-probe-card';
 import './flowio-alarms-card';
 import './flowio-status-card';
 import './flowio-override-card';

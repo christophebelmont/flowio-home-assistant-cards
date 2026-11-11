@@ -18,6 +18,7 @@ Cartes de supervision et de pilotage pour les entités MQTT du firmware Flow.io-
 - `custom:flowio-equipment-card` : grille de tuiles pour les équipements sélectionnés (bascule par l’icône).
 - `custom:flowio-modes-card` : grille de tuiles pour les modes manuel, automatique et hivernage.
 - `custom:flowio-probes-card` : grille de sondes en barres ou jauges, nom/couleur/échelle configurables.
+- `custom:flowio-probe-card` : sonde unique en barre ou jauge, nom/couleur/échelle configurables.
 - `custom:flowio-alarms-card` : synthèse des alarmes surveillées et liste des alarmes actives.
 - `custom:flowio-status-card` : informations système du contrôleur (IP, mémoire, temps de fonctionnement, tension, courant).
 - `custom:flowio-override-card` : forçage d’un équipement en marche/arrêt pendant une durée choisie.
@@ -149,6 +150,24 @@ items:
 ```
 
 `columns` règle le nombre de colonnes de la grille (1–6). `entities` liste les sondes affichées (l’éditeur propose les capteurs du préfixe, avec le préfixe d’équipement retiré). Le nom affiché retire le préfixe commun (par exemple « Flow.io Waveshare »), détecté automatiquement ou forcé via `name_prefix`. Chaque sonde peut être personnalisée via `items[<entité>]` : `name` (nom convivial), `color` (nom de modèle Flow.io ou code CSS), `min`/`max` (échelle) et `mode` (`line` = barre, ou `gauge` = jauge). Sans personnalisation, la couleur suit le modèle Flow.io, l’échelle reprend les bornes `min`/`max` de l’entité (barre ou jauge laissée vide si absentes), et le mode est `line`. Les anciens champs `colors` et `scales` restent acceptés et migrés. Une entité absente est signalée explicitement.
+
+## Sonde unique
+
+```yaml
+type: custom:flowio-probe-card
+title: Sonde
+entity_prefix: fio
+entity: sensor.fio_io_ph
+name_prefix: ''
+item:
+  name: pH
+  color: '#8e24aa'
+  min: 6
+  max: 8.4
+  mode: gauge
+```
+
+Même modèle que la carte Sondes, pour une seule entité. L’éditeur propose la liste des capteurs du préfixe dans une liste déroulante (sélection unique), puis permet de régler le nom convivial, la couleur, l’échelle `min`/`max` et le mode (`line` = barre, ou `gauge` = jauge) via `item`. Sans personnalisation, la couleur suit le modèle Flow.io et l’échelle reprend les bornes `min`/`max` de l’entité (barre ou jauge laissée vide si absentes). Une entité absente est signalée explicitement.
 
 ## Alarmes
 

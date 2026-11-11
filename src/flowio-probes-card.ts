@@ -42,9 +42,9 @@ class FlowioProbesCard extends LitElement {
     const scale = probeScale(config, id, state);
     const text = !state ? 'Entité absente' : !available(state) ? 'Indisponible' : value === undefined ? state.state : `${state.state}${unit ? ` ${unit}` : ''}`;
     const { tone, custom } = resolveProbeColor(config, id, state);
-    const attrs = `data-entity=${id} data-tone=${tone} data-available=${available(state) ? 'true' : 'false'}`;
+    const availability = available(state) ? 'true' : 'false';
     if (probeMode(config, id) === 'gauge') {
-      return html`<div class="probe gauge" ${attrs} style=${custom ? `--fio-accent:${custom}` : ''}>
+      return html`<div class="probe gauge" data-entity=${id} data-tone=${tone} data-available=${availability} style=${custom ? `--fio-accent:${custom}` : ''}>
         <button type=button class=probe-head ?disabled=${!state} @click=${() => this.more(id)}>
           <span class=probe-name>${label}</span>
           <strong class=probe-value>${!state ? 'Entité absente' : !available(state) ? 'Indisponible' : ''}</strong>
@@ -53,7 +53,7 @@ class FlowioProbesCard extends LitElement {
       </div>`;
     }
     const ratio = value !== undefined && scale ? Math.min(100, Math.max(0, (value - scale.min) / (scale.max - scale.min) * 100)) : 0;
-    return html`<div class=probe ${attrs} style=${custom ? `--fio-accent:${custom}` : ''}>
+    return html`<div class=probe data-entity=${id} data-tone=${tone} data-available=${availability} style=${custom ? `--fio-accent:${custom}` : ''}>
       <button type=button class=probe-head ?disabled=${!state} @click=${() => this.more(id)}>
         <span class=probe-name>${label}</span>
         <strong class=probe-value>${text}</strong>
