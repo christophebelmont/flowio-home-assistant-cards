@@ -44,7 +44,7 @@ export const poolStyles=css`
 .fio-card .control[data-on=true][data-available=true] .icon-plate{color:var(--fio-accent)}
 .fio-card .grid[data-group=tanks]{box-sizing:border-box;width:fit-content;max-width:100%;min-width:0;padding:10px;border:1px solid color-mix(in srgb,var(--fio-trim) 65%,var(--fio-ph));border-radius:15px;background:var(--fio-panel);box-shadow:0 2px 8px color-mix(in srgb,var(--primary-text-color) 5%,transparent)}
 @container(max-width:700px){
-.fio-card{--fio-tile-size:calc((100cqi - 44px)/2);border-radius:12px}
+.fio-card{--fio-tile-size:calc((100cqi - 52px)/2);border-radius:12px}
 .fio-card .hero{padding:10px;gap:8px}
 .fio-card .body{padding:12px 8px}
 .fio-card .dashboard-top{gap:18px}
