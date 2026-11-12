@@ -13,7 +13,7 @@ test('carte équipements : puce de forçage sur l’équipement actuellement for
     el.hass = { ...el.hass, states };
   });
   await expect(card.locator('.tile-forced')).toHaveCount(1);
-  await expect(card.locator('.tile-slot').first().locator('.tile-forced')).toHaveText('[Forcé]');
+  await expect(card.locator('.tile-slot').first().locator('.tile-forced')).toHaveText('Forcé');
   await expect(card.locator('.tile-slot').first()).toHaveAttribute('data-forced', 'true');
   await expect(card.locator('.tile-slot').nth(1)).toHaveAttribute('data-forced', 'false');
 });

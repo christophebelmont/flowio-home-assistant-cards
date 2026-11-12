@@ -8,7 +8,7 @@ export function normalizeEquipmentConfig(input: unknown): TileGridConfig {
 class FlowioEquipmentCard extends FlowioTileGridCard {
   protected normalizeConfig(input: unknown): TileGridConfig { return normalizeEquipmentConfig(input); }
   protected tileForcedLabel(entity: string): string | undefined {
-    return equipmentForced(this.hass, entity) ? `[${forcedLabel(this.hass)}]` : undefined;
+    return equipmentForced(this.hass, entity) ? forcedLabel(this.hass) : undefined;
   }
   static getConfigElement() { return document.createElement('flowio-equipment-card-editor'); }
   static getStubConfig(): TileGridConfig { return normalizeEquipmentConfig({}); }
