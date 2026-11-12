@@ -25,6 +25,7 @@ Cartes de supervision et de pilotage pour les entités MQTT du firmware Flow.io-
 - `custom:flowio-graph-card` : un seul graphique ApexCharts (courbe ou barres) pour les entités choisies, avec couleur par entité.
 - `custom:flowio-pool-card` : jauges pH/ORP/pression, températures, équipements, modes, alarmes, cuves et frise de filtration.
 - `custom:flowio-history-card` : courbes ApexCharts alimentées par l'historique Home Assistant/Recorder.
+- `custom:flowio-state-history-card` : frise des états booléens (interrupteurs et capteurs binaires) sur les 24 h du jour, avec position de l'heure courante.
 
 Les cartes reprennent le thème Home Assistant et les motifs visuels Flow.io déjà établis. Elles privilégient les composants natifs de l’instance, notamment `ha-switch`, `ha-button`, `ha-icon` et la carte native de titre ; aucun substitut de ces contrôles n’est inclus dans le bundle de production.
 
@@ -251,6 +252,21 @@ calculated_values: [v00, v01]
 ```
 
 Le Recorder doit fournir les historiques des entités choisies. Les valeurs calculées peuvent aussi être affichées dans la carte piscine avec `display.calculated_values`. La carte ne remplace pas la configuration du Recorder.
+
+## Historique des états
+
+```yaml
+type: custom:flowio-state-history-card
+title: Historique des états
+entity_prefix: fio
+name_prefix: Flow.io Waveshare
+entities:
+  - switch.fio_io_flt_pmp
+  - switch.fio_io_lights
+  - binary_sensor.fio_alm_any_active
+```
+
+Une frise par entité couvre les 24 heures de la journée en cours : la piste reste grise quand l'état est inactif et prend la couleur d'activation quand il est actif (`on`), l'icône s'allume avec l'état et une barre verticale marque l'heure courante, avec la durée d'activation du jour à droite. Les entités se choisissent dans la liste des interrupteurs et capteurs binaires du préfixe (`switch.*` et `binary_sensor.*`) ; `name_prefix` retire un texte devant les noms (vide = détection automatique) et l'ordre d'affichage se règle par glisser-déposer dans l'éditeur. Les données viennent du Recorder ; une entité absente n'est pas transformée en zéro.
 
 ## Commandes et limites
 

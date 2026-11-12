@@ -1,0 +1,42 @@
+import { test, expect } from '@playwright/test';
+
+test.use({ timezoneId: 'UTC' });
+
+test('carte historique des états : frise 24 h, marqueur horaire et couleurs', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-10-29T12:00:00Z') });
+  await page.goto('/demo/cards.html');
+  const card = page.locator('flowio-state-history-card');
+  await expect(card.locator('h2')).toHaveText('Historique des états');
+  await expect(card.locator('.day-badge')).toContainText('00:00 — 24:00');
+  await expect(card.locator('.board')).toBeVisible();
+  await expect(card.locator('.row-name')).toHaveCount(5);
+  await expect(card.locator('.track')).toHaveCount(5);
+  expect(await card.locator('.track .seg').count()).toBeGreaterThan(0);
+  await expect(card.locator('.now-line')).toHaveCount(1);
+  await expect(card.locator('.now-dot')).toHaveCount(1);
+  await expect(card.locator('.axis .now-label')).toHaveText(/^\d{2}:\d{2}$/);
+  const ticks = card.locator('.axis > span:not(.now-label)');
+  await expect(ticks).toHaveCount(9);
+  await expect(ticks).toHaveText(['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00', '24:00']);
+  await expect(card.locator('.row-icon[data-on=true]')).toHaveCount(2);
+  const activeColor = await card.locator('.row-icon[data-on=true]').first().evaluate(el => getComputedStyle(el).color);
+  expect(activeColor).toBe('rgb(255, 160, 0)');
+  const trackColor = await card.locator('.track').first().evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(trackColor).toBe('rgb(243, 245, 247)');
+  const segColor = await card.locator('.track .seg').first().evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(segColor).toBe('rgb(255, 160, 0)');
+});
+
+test('carte historique des états : ordre et texte retiré devant les noms', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-10-29T12:00:00Z') });
+  await page.goto('/demo/cards.html');
+  const card = page.locator('flowio-state-history-card');
+  await expect(card.locator('.board')).toBeVisible();
+  await page.evaluate(() => {
+    const el = document.querySelector('flowio-state-history-card') as any;
+    el.setConfig({ entity_prefix: 'fio', name_prefix: 'Flow.io Waveshare ', entities: ['switch.fio_io_lights', 'switch.fio_io_flt_pmp'] });
+  });
+  await expect(card.locator('.row-name')).toHaveCount(2);
+  await expect(card.locator('.row-name').nth(0)).toHaveText('Éclairage');
+  await expect(card.locator('.row-name').nth(1)).toHaveText('Filtration');
+});
