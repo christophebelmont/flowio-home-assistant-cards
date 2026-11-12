@@ -60,3 +60,8 @@ export function overrideRemainingMinutes(hass: Hass | undefined, prefix: string)
 export function overrideTargetEntity(hass: Hass | undefined, prefix: string): string {
   return overrideEntityIds(prefix).target;
 }
+
+export function equipmentForced(hass: Hass | undefined, id: string): boolean {
+  const value = hass?.states[id]?.attributes.forced;
+  return value === true || value === 'true';
+}

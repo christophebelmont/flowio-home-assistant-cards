@@ -7,8 +7,8 @@ test('carte historique des états : frise 24 h, marqueur horaire et couleurs', a
   await page.goto('/demo/cards.html');
   const card = page.locator('flowio-state-history-card');
   await expect(card.locator('h3.title')).toHaveText('Historique des états');
-  await expect(card.locator('.day-badge')).toContainText('00:00 — 24:00');
-  await expect(card.locator('ha-card .card-head .title')).toBeVisible();
+  await expect(card.locator('.day-badge')).toHaveCount(0);
+  await expect(card.locator('ha-card .card-head')).toHaveCount(0);
   await expect(card.locator('.board')).toBeVisible();
   await expect(card.locator('.row-name')).toHaveCount(5);
   await expect(card.locator('.track')).toHaveCount(5);

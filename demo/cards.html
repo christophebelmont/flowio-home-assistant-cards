@@ -5,6 +5,7 @@
 <flowio-header-card></flowio-header-card><flowio-filtration-card></flowio-filtration-card><flowio-treatment-card></flowio-treatment-card><flowio-equipment-card></flowio-equipment-card><flowio-modes-card></flowio-modes-card><flowio-probes-card></flowio-probes-card><flowio-probe-card></flowio-probe-card><flowio-alarms-card></flowio-alarms-card><flowio-status-card></flowio-status-card><flowio-override-card></flowio-override-card><flowio-graph-card></flowio-graph-card><flowio-state-history-card></flowio-state-history-card></main><script type=module>
 import '/demo/ha-switch.js';
 import '/demo/ha-native-controls.js';
+import '/demo/ha-native-heading.js';
 import '/dist/flowio-home-assistant-cards.js';
 if(!customElements.get('ha-card'))customElements.define('ha-card',class extends HTMLElement{constructor(){super();this.attachShadow({mode:'open'}).innerHTML='<style>:host{display:block;background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:var(--ha-card-border-radius)}</style><slot></slot>';}});
 const names={chlorine:'Chlore/Brome',electrolysis:'Electrolyse',oxygen:'Oxygène actif',none:'Désactivé'};

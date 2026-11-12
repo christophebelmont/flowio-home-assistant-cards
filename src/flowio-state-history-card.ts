@@ -168,11 +168,7 @@ class FlowioStateHistoryCard extends LitElement {
     const clock = clockTime(this.now, this.hass?.config?.time_zone);
     return html`
       <ha-card><div class=body>
-        <div class=card-head>
-          <ha-icon class=head-icon icon=mdi:waveform aria-hidden=true></ha-icon>
-          <h3 class=title>${config.title}</h3>
-          <span class=day-badge><ha-icon icon=mdi:calendar-range aria-hidden=true></ha-icon>00:00 — 24:00</span>
-        </div>
+        <h3 class=title>${config.title}</h3>
         ${!config.entities.length ? html`<p class=message>Choisir les entités dans l’éditeur.</p>` : nothing}
         ${this.error ? html`<p class=warning role=alert>${this.error}</p>` : nothing}
         ${rows.length ? html`<div class=board>
@@ -194,11 +190,7 @@ class FlowioStateHistoryCard extends LitElement {
     :host{--fio-state-active:var(--fio-air,var(--accent-color,var(--primary-color)));--fio-now:var(--fio-water)}
     ha-card{overflow:hidden}
     .body{padding:16px}
-    .card-head{display:flex;align-items:center;gap:10px;margin:0 0 14px}
-    .head-icon{flex:0 0 auto;color:var(--fio-water);--mdc-icon-size:24px}
-    .title{margin:0;min-width:0;flex:1;font-size:calc(1.05rem * var(--fio-font-scale, 1.32));font-weight:650;line-height:1.25;letter-spacing:normal;color:var(--primary-text-color);overflow-wrap:anywhere}
-    .day-badge{margin-inline-start:auto;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--secondary-background-color);color:var(--secondary-text-color);font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
-    .day-badge ha-icon{--mdc-icon-size:18px}
+    .title{margin:0 0 14px;min-width:0;font-size:calc(1.05rem * var(--fio-font-scale, 1.32));font-weight:650;line-height:1.25;letter-spacing:normal;color:var(--primary-text-color);overflow-wrap:anywhere}
     .board{display:grid;grid-template-columns:28px minmax(0,26%) minmax(0,1fr) auto;column-gap:12px;row-gap:12px;align-items:center}
     .row-icon{display:inline-flex;align-items:center;justify-content:center;color:var(--secondary-text-color)}
     .row-icon[data-on=true]{color:var(--fio-state-active)}
@@ -216,7 +208,7 @@ class FlowioStateHistoryCard extends LitElement {
     .tick.start{transform:translateX(0)}
     .tick.center{transform:translateX(-50%)}
     .tick.end{transform:translateX(-100%)}
-    .now-label{position:absolute;top:0;transform:translate(-50%,-50%);padding:3px 8px;border-radius:999px;background:var(--fio-now);color:var(--text-primary-color,#fff);font-size:var(--ha-font-size-s, calc(.66rem * var(--fio-font-scale, 1.32)));font-weight:700;white-space:nowrap;box-shadow:0 2px 6px color-mix(in srgb,var(--fio-now) 30%,transparent)}
+    .now-label{position:absolute;top:-10px;transform:translate(-50%,-50%);padding:3px 8px;border-radius:999px;background:var(--fio-now);color:var(--text-primary-color,#fff);font-size:var(--ha-font-size-s, calc(.66rem * var(--fio-font-scale, 1.32)));font-weight:700;white-space:nowrap;box-shadow:0 2px 6px color-mix(in srgb,var(--fio-now) 30%,transparent)}
     .message{margin:8px 0;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));color:var(--secondary-text-color)}
     .warning{margin:8px 0;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));color:var(--error-color)}
     @container(max-width:640px){.tick:nth-child(even){display:none}}

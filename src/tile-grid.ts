@@ -54,12 +54,16 @@ export abstract class FlowioTileGridCard extends LitElement {
   protected config?: TileGridConfig;
   protected error = '';
   private tiles: NativeCard[] = [];
+  private slots: HTMLElement[] = [];
+  private overlays: (HTMLElement | undefined)[] = [];
   private key = '';
   private synced = false;
   private loading = false;
   private generation = 0;
 
   protected abstract normalizeConfig(input: unknown): TileGridConfig;
+
+  protected tileFlag(_entity: string): boolean { return false; }
 
   setConfig(input: unknown) {
     this.config = this.normalizeConfig(input);
@@ -77,8 +81,34 @@ export abstract class FlowioTileGridCard extends LitElement {
   private mount() {
     const grid = this.renderRoot.querySelector<HTMLElement>('.grid');
     if (!grid) return;
-    if (grid.children.length !== this.tiles.length || this.tiles.some((tile, index) => grid.children[index] !== tile)) {
-      grid.replaceChildren(...this.tiles);
+    const entities = this.config?.entities ?? [];
+    const slots = this.tiles.map((tile, index) => {
+      let slot = this.slots[index];
+      if (!slot) {
+        slot = document.createElement('div');
+        slot.className = 'tile-slot';
+        slot.append(tile);
+        this.slots[index] = slot;
+      }
+      let overlay = this.overlays[index];
+      if (this.tileFlag(entities[index] ?? '')) {
+        if (!overlay) {
+          overlay = document.createElement('span');
+          overlay.className = 'tile-flag';
+          overlay.setAttribute('role', 'img');
+          overlay.setAttribute('aria-label', 'Forçage actif');
+          overlay.title = 'Forçage actif';
+          slot.append(overlay);
+          this.overlays[index] = overlay;
+        }
+      } else if (overlay) {
+        overlay.remove();
+        this.overlays[index] = undefined;
+      }
+      return slot;
+    });
+    if (grid.children.length !== slots.length || slots.some((slot, index) => grid.children[index] !== slot)) {
+      grid.replaceChildren(...slots);
     }
     for (const tile of this.tiles) tile.hass = this.hass;
   }
@@ -97,6 +127,8 @@ export abstract class FlowioTileGridCard extends LitElement {
       const helpers = await load();
       if (token !== this.generation || !this.isConnected) return;
       const prefix = config.name_prefix || commonEntityPrefix(config.entities, this.hass?.states);
+      this.slots = [];
+      this.overlays = [];
       this.tiles = config.entities.map(entity => {
         const raw = entityName(entity, this.hass?.states[entity]);
         const tileConfig: Record<string, unknown> = { type: 'tile', entity, hide_state: false, icon_tap_action: { action: 'toggle' }, tap_action: { action: 'more-info' } };
@@ -138,6 +170,8 @@ export abstract class FlowioTileGridCard extends LitElement {
     .message{margin:0;font-size:calc(.82rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
     .grid{display:grid;grid-template-columns:repeat(var(--columns,2),minmax(0,1fr));gap:10px}
     .grid>*{display:block;min-width:0}
+    .tile-slot{position:relative;display:block;min-width:0}
+    .tile-flag{position:absolute;top:6px;left:46px;width:12px;height:12px;border-radius:50%;background:var(--error-color,#db4437);box-shadow:0 0 0 2px var(--ha-card-background,var(--card-background-color,#fff));z-index:1;pointer-events:none}
     @container(max-width:420px){.grid{grid-template-columns:minmax(0,1fr)}}
   `;
 }
