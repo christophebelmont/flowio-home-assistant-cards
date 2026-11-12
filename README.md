@@ -266,7 +266,7 @@ entities:
   - binary_sensor.fio_alm_any_active
 ```
 
-Une frise par entité couvre les 24 heures de la journée en cours : la piste reste grise quand l'état est inactif et prend la couleur d'activation quand il est actif (`on`), l'icône s'allume avec l'état et une barre verticale marque l'heure courante, avec la durée d'activation du jour à droite. Les entités se choisissent dans la liste des interrupteurs et capteurs binaires du préfixe (`switch.*` et `binary_sensor.*`) ; `name_prefix` retire un texte devant les noms (vide = détection automatique) et l'ordre d'affichage se règle par glisser-déposer dans l'éditeur. Les données viennent du Recorder ; une entité absente n'est pas transformée en zéro.
+Une frise par entité couvre les 24 heures de la journée en cours : la piste reste grise quand l'état est inactif et prend la couleur d'activation quand il est actif (`on` ou `true`), l'icône s'allume avec l'état et une barre verticale marque l'heure courante, avec la durée d'activation du jour à droite. Les entités se choisissent dans la liste des interrupteurs et capteurs binaires du préfixe (`switch.*` et `binary_sensor.*`) ; `name_prefix` retire un texte devant les noms (vide = détection automatique) et l'ordre d'affichage se règle par glisser-déposer dans l'éditeur. Chaque entité peut être personnalisée via `items[<entité>]` : `name` (nom affiché, remplace le préfixe retiré) et `color` (couleur d'activation, choisie par pastilles dans l'éditeur ou code CSS ; vide = couleur d'activation par défaut). Les données viennent du Recorder ; une entité absente n'est pas transformée en zéro.
 
 ## Commandes et limites
 

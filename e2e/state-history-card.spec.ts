@@ -47,3 +47,21 @@ test('carte historique des états : ordre et texte retiré devant les noms', asy
   await expect(card.locator('.row-name').nth(0)).toHaveText('Éclairage');
   await expect(card.locator('.row-name').nth(1)).toHaveText('Filtration');
 });
+
+test('carte historique des états : nom et couleur d’activation par entité', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-10-29T12:00:00Z') });
+  await page.goto('/demo/cards.html');
+  const card = page.locator('flowio-state-history-card');
+  await expect(card.locator('.board')).toBeVisible();
+  await page.evaluate(() => {
+    const el = document.querySelector('flowio-state-history-card') as any;
+    el.setConfig({ entity_prefix: 'fio', entities: ['switch.fio_io_flt_pmp', 'switch.fio_io_lights'], items: { 'switch.fio_io_lights': { name: 'Éclairage jardin', color: '#ff00aa' } } });
+  });
+  await expect(card.locator('.row-name')).toHaveCount(2);
+  await expect(card.locator('.row-name').nth(0)).toHaveText('Filtration');
+  await expect(card.locator('.row-name').nth(1)).toHaveText('Éclairage jardin');
+  const seg = await card.locator('.track').nth(1).locator('.seg').first().evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(seg).toBe('rgb(255, 0, 170)');
+  const icon = await card.locator('.row-icon').nth(1).evaluate(el => getComputedStyle(el).color);
+  expect(icon).toBe('rgb(255, 0, 170)');
+});

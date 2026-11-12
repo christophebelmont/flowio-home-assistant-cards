@@ -3,15 +3,18 @@ import './order-list';
 import type { EntityState, Hass } from './model';
 import { baseStyles } from './card-styles';
 import { onIntervals } from './history-data';
-import { commonEntityPrefix, displayName, entityName } from './names';
+import { commonEntityPrefix } from './names';
 import { mergeOrder, orderItems } from './order-list';
 import {
   clockTime,
   formatDuration,
   isActive,
   normalizeStateHistoryConfig,
+  STATE_PALETTE,
+  stateActiveColor,
   stateHistoryIds,
   stateIcon,
+  stateLabel,
   todayBounds,
   totalDuration,
   type StateHistoryConfig
@@ -130,7 +133,7 @@ class FlowioStateHistoryCard extends LitElement {
     const prefix = this.namePrefix();
     const rows = await Promise.all(ids.map(async (id): Promise<Row> => {
       const state = hass.states[id];
-      const name = displayName(entityName(id, state), prefix);
+      const name = stateLabel(config, id, state, prefix);
       const icon = stateIcon(id, state);
       if (!state) return { id, name, icon, intervals: [], total: 0, on: false };
       const active = isActive(state);
@@ -150,11 +153,13 @@ class FlowioStateHistoryCard extends LitElement {
 
   private row(row: Row, index: number) {
     const line = index + 1;
+    const color = this.config ? stateActiveColor(this.config, row.id) : '';
+    const tint = color ? `--fio-state-active:${color}` : '';
     const label = row.error ? row.error : `${row.name} · ${row.on ? 'actif' : 'inactif'} · ${formatDuration(row.total)} sur la journée`;
     return html`
-      <span class=row-icon style=${`grid-row:${line};grid-column:1`} data-on=${row.on ? 'true' : 'false'}><ha-icon .icon=${row.icon} aria-hidden=true></ha-icon></span>
+      <span class=row-icon style=${`grid-row:${line};grid-column:1;${tint}`} data-on=${row.on ? 'true' : 'false'}><ha-icon .icon=${row.icon} aria-hidden=true></ha-icon></span>
       <button type=button class=row-name style=${`grid-row:${line};grid-column:2`} ?disabled=${!row.state} @click=${() => this.more(row.id)} aria-label=${`Détail ${row.name}`}>${row.name}</button>
-      <div class=track style=${`grid-row:${line};grid-column:3`} role=img aria-label=${label}>
+      <div class=track style=${`grid-row:${line};grid-column:3;${tint}`} role=img aria-label=${label}>
         ${row.intervals.map(([from, to]) => html`<span class=seg style=${`left:${this.pct(from)}%;width:${Math.max(0, this.pct(to) - this.pct(from))}%`}></span>`)}
       </div>
       <span class=row-total style=${`grid-row:${line};grid-column:4`}>${formatDuration(row.total)}</span>`;
@@ -195,11 +200,11 @@ class FlowioStateHistoryCard extends LitElement {
     .row-icon{display:inline-flex;align-items:center;justify-content:center;color:var(--secondary-text-color)}
     .row-icon[data-on=true]{color:var(--fio-state-active)}
     .row-icon ha-icon{--mdc-icon-size:22px}
-    .row-name{min-width:0;padding:0;border:0;background:none;text-align:left;font-family:inherit;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));font-weight:500;line-height:1.25;color:var(--primary-text-color);overflow-wrap:anywhere;cursor:pointer}
+    .row-name{min-width:0;padding:0;border:0;background:none;text-align:left;font-family:inherit;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));font-weight:400;line-height:1.25;color:var(--primary-text-color);overflow-wrap:anywhere;cursor:pointer}
     .row-name:disabled{cursor:default;color:var(--secondary-text-color)}
     .track{position:relative;height:8px;border-radius:999px;background:var(--secondary-background-color);box-shadow:inset 0 0 0 1px var(--divider-color)}
     .seg{position:absolute;inset-block:0;border-radius:999px;background:var(--fio-state-active)}
-    .row-total{justify-self:end;font-size:var(--ha-font-size-l, calc(1rem * var(--fio-font-scale, 1.32)));font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .row-total{justify-self:end;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));font-weight:400;font-variant-numeric:tabular-nums;white-space:nowrap}
     .now-track{position:relative;align-self:stretch;pointer-events:none}
     .now-line{position:absolute;top:-6px;bottom:-14px;width:2px;transform:translateX(-50%);border-radius:2px;background:var(--fio-now)}
     .now-dot{position:absolute;top:-12px;width:10px;height:10px;border-radius:50%;transform:translateX(-50%);background:var(--fio-now)}
@@ -208,7 +213,7 @@ class FlowioStateHistoryCard extends LitElement {
     .tick.start{transform:translateX(0)}
     .tick.center{transform:translateX(-50%)}
     .tick.end{transform:translateX(-100%)}
-    .now-label{position:absolute;top:-10px;transform:translate(-50%,-50%);padding:3px 8px;border-radius:999px;background:var(--fio-now);color:var(--text-primary-color,#fff);font-size:var(--ha-font-size-s, calc(.66rem * var(--fio-font-scale, 1.32)));font-weight:700;white-space:nowrap;box-shadow:0 2px 6px color-mix(in srgb,var(--fio-now) 30%,transparent)}
+    .now-label{position:absolute;top:-5px;transform:translate(-50%,-50%);padding:3px 8px;border-radius:999px;background:var(--fio-now);color:var(--text-primary-color,#fff);font-size:var(--ha-font-size-s, calc(.66rem * var(--fio-font-scale, 1.32)));font-weight:700;white-space:nowrap;box-shadow:0 2px 6px color-mix(in srgb,var(--fio-now) 30%,transparent)}
     .message{margin:8px 0;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));color:var(--secondary-text-color)}
     .warning{margin:8px 0;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));color:var(--error-color)}
     @container(max-width:640px){.tick:nth-child(even){display:none}}
@@ -237,7 +242,7 @@ class FlowioStateHistoryEditor extends LitElement {
     try {
       const value = (event.detail?.value ?? {}) as Record<string, unknown>;
       const selected = Array.isArray(value.entities) ? value.entities as string[] : this.config.entities;
-      this.commit(normalizeStateHistoryConfig({ ...value, entities: mergeOrder(this.config.entities, selected) }));
+      this.commit(normalizeStateHistoryConfig({ ...value, entities: mergeOrder(this.config.entities, selected), items: this.config.items }));
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'Configuration invalide';
     }
@@ -252,11 +257,43 @@ class FlowioStateHistoryEditor extends LitElement {
     }
   }
 
+  private setItem(id: string, patch: { name?: string; color?: string }) {
+    if (!this.config) return;
+    try {
+      const items = { ...this.config.items };
+      const next: Record<string, unknown> = { ...items[id] };
+      for (const [key, value] of Object.entries(patch)) {
+        if (value === '' || value === undefined) delete next[key];
+        else next[key] = value;
+      }
+      if (Object.keys(next).length) items[id] = next as never;
+      else delete items[id];
+      this.commit(normalizeStateHistoryConfig({ ...this.config, items }));
+    } catch (error) {
+      this.error = error instanceof Error ? error.message : 'Configuration invalide';
+    }
+  }
+
+  private item(id: string, prefix: string) {
+    const config = this.config!;
+    const item = config.items[id] ?? {};
+    const label = stateLabel(config, id, this.hass!.states[id], prefix);
+    const selected = item.color ?? '';
+    return html`<details class=item>
+      <summary>${label}</summary>
+      <label class=field><span>Nom affiché</span><input type=text .value=${item.name ?? ''} placeholder=${label} @change=${(event: Event) => this.setItem(id, { name: (event.target as HTMLInputElement).value })}></label>
+      <div class=field><span>Couleur quand actif</span><div class=swatches role=group aria-label=${`Couleur de ${label}`}>
+        <button type=button class="swatch auto" data-selected=${selected ? 'false' : 'true'} title="Automatique" aria-label=${`Couleur automatique pour ${label}`} @click=${() => this.setItem(id, { color: '' })}>Auto</button>
+        ${STATE_PALETTE.map(hex => html`<button type=button class=swatch style=${`--swatch:${hex}`} data-selected=${selected === hex ? 'true' : 'false'} title=${hex} aria-label=${`Couleur ${hex} pour ${label}`} @click=${() => this.setItem(id, { color: hex })}></button>`)}
+      </div></div>
+    </details>`;
+  }
+
   private options(): { value: string; label: string }[] {
-    if (!this.hass) return [];
-    const ids = stateHistoryIds(this.hass, this.config?.entity_prefix ?? 'fio');
-    const prefix = this.config?.name_prefix || commonEntityPrefix(ids, this.hass.states);
-    return ids.map(id => ({ value: id, label: `${displayName(entityName(id, this.hass!.states[id]), prefix)} · ${id}` }));
+    if (!this.hass || !this.config) return [];
+    const ids = stateHistoryIds(this.hass, this.config.entity_prefix ?? 'fio');
+    const prefix = this.config.name_prefix || commonEntityPrefix(ids, this.hass.states);
+    return ids.map(id => ({ value: id, label: `${stateLabel(this.config!, id, this.hass!.states[id], prefix)} · ${id}` }));
   }
 
   render() {
@@ -276,10 +313,25 @@ class FlowioStateHistoryEditor extends LitElement {
     const computeLabel = (field: { name: string }) => labels[field.name] ?? field.name;
     const prefix = this.config.name_prefix || commonEntityPrefix(this.config.entities, this.hass.states);
     const items = orderItems(this.config.entities, this.hass.states, prefix);
-    return html`<p>Choisir les interrupteurs et capteurs binaires Flow.io à suivre. La carte couvre les 24 heures de la journée en cours ; l’ordre d’affichage et le texte à retirer devant les noms sont réglables.</p>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${computeLabel} @value-changed=${this.changed}></ha-form><flowio-order-list .items=${items} @order-changed=${(event: CustomEvent) => this.reorder(event.detail.order)}></flowio-order-list><ha-form .hass=${this.hass} .data=${this.config} .schema=${entitySchema} .computeLabel=${computeLabel} @value-changed=${this.changed}></ha-form>`;
+    return html`<p>Choisir les interrupteurs et capteurs binaires Flow.io à suivre. La carte couvre les 24 heures de la journée en cours. Chaque entité peut recevoir un nom affiché et une couleur d’activation personnalisés ; l’ordre et le texte à retirer devant les noms sont réglables.</p>${this.error ? html`<p role=alert>${this.error}</p>` : nothing}<ha-form .hass=${this.hass} .data=${this.config} .schema=${schema} .computeLabel=${computeLabel} @value-changed=${this.changed}></ha-form><flowio-order-list .items=${items} @order-changed=${(event: CustomEvent) => this.reorder(event.detail.order)}></flowio-order-list><ha-form .hass=${this.hass} .data=${this.config} .schema=${entitySchema} .computeLabel=${computeLabel} @value-changed=${this.changed}></ha-form>${this.config.entities.length ? html`<div class=items><h4>Entités</h4>${this.config.entities.map(id => this.item(id, prefix))}</div>` : nothing}`;
   }
 
-  static styles = css`:host{display:block}p{color:var(--secondary-text-color);line-height:1.5}p[role=alert]{color:var(--error-color)}`;
+  static styles = css`
+    :host{display:block}
+    p{color:var(--secondary-text-color);line-height:1.5}
+    p[role=alert]{color:var(--error-color)}
+    .items{margin-top:16px}
+    .items h4{margin:0 0 10px;font-size:calc(.9rem * var(--fio-font-scale, 1.32))}
+    .item{border:1px solid var(--divider-color);border-radius:10px;margin-bottom:8px;padding:0 12px}
+    .item summary{cursor:pointer;padding:10px 0;font-size:calc(.85rem * var(--fio-font-scale, 1.32));font-weight:600}
+    .field{display:flex;flex-direction:column;gap:6px;margin:0 0 12px}
+    .field>span{font-size:calc(.75rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
+    .field input{min-height:40px;width:100%;box-sizing:border-box;font:inherit;color:var(--primary-text-color);background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;padding:0 8px}
+    .swatches{display:flex;flex-wrap:wrap;gap:6px}
+    .swatch{width:26px;height:26px;padding:0;border-radius:50%;border:1px solid var(--divider-color);background:var(--swatch);cursor:pointer}
+    .swatch.auto{width:auto;padding:0 10px;border-radius:999px;background:var(--secondary-background-color);font:inherit;font-size:calc(.72rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
+    .swatch[data-selected=true]{outline:2px solid var(--primary-color);outline-offset:2px}
+  `;
 }
 
 if (!customElements.get('flowio-state-history-card')) customElements.define('flowio-state-history-card', FlowioStateHistoryCard);

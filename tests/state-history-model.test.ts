@@ -4,8 +4,10 @@ import {
   formatDuration,
   isActive,
   normalizeStateHistoryConfig,
+  stateActiveColor,
   stateHistoryIds,
   stateIcon,
+  stateLabel,
   todayBounds,
   totalDuration
 } from '../src/state-history-model';
@@ -78,6 +80,24 @@ it('considère actifs les états on et true', () => {
   expect(isActive(state('true'))).toBe(true);
   expect(isActive(state('off'))).toBe(false);
   expect(isActive(undefined)).toBe(false);
+});
+
+it('accepte un nom et une couleur par entité', () => {
+  const config = normalizeStateHistoryConfig({ items: { 'switch.a': { name: 'Filt', color: '#ff0000' }, 'switch.b': {} } });
+  expect(config.items).toEqual({ 'switch.a': { name: 'Filt', color: '#ff0000' }, 'switch.b': {} });
+  expect(normalizeStateHistoryConfig({}).items).toEqual({});
+  expect(() => normalizeStateHistoryConfig({ items: { a: { name: 3 } } })).toThrow();
+  expect(() => normalizeStateHistoryConfig({ items: { a: { color: 3 } } })).toThrow();
+  expect(() => normalizeStateHistoryConfig({ items: [] })).toThrow();
+});
+
+it('résout le libellé et la couleur par entité', () => {
+  const config = normalizeStateHistoryConfig({ entities: ['switch.a', 'switch.b'], items: { 'switch.a': { name: 'Filt', color: '#ff0000' } } });
+  const named = (name: string) => state('on', { friendly_name: name });
+  expect(stateLabel(config, 'switch.a', named('Flow.io A'), 'Flow.io ')).toBe('Filt');
+  expect(stateLabel(config, 'switch.b', named('Flow.io B'), 'Flow.io ')).toBe('B');
+  expect(stateActiveColor(config, 'switch.a')).toBe('#ff0000');
+  expect(stateActiveColor(config, 'switch.b')).toBe('');
 });
 
 it('affiche l’heure dans le fuseau demandé', () => {

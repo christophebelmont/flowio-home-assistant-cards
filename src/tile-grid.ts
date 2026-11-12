@@ -171,7 +171,7 @@ export abstract class FlowioTileGridCard extends LitElement {
     .grid{display:grid;grid-template-columns:repeat(var(--columns,2),minmax(0,1fr));gap:10px}
     .grid>*{display:block;min-width:0}
     .tile-slot{position:relative;display:block;min-width:0}
-    .tile-flag{position:absolute;top:6px;left:46px;width:12px;height:12px;border-radius:50%;background:var(--error-color,#db4437);box-shadow:0 0 0 2px var(--ha-card-background,var(--card-background-color,#fff));z-index:1;pointer-events:none}
+    .tile-flag{position:absolute;top:11px;left:41px;width:12px;height:12px;border-radius:50%;background:var(--error-color,#db4437);box-shadow:0 0 0 2px var(--ha-card-background,var(--card-background-color,#fff));z-index:1;pointer-events:none}
     @container(max-width:420px){.grid{grid-template-columns:minmax(0,1fr)}}
   `;
 }

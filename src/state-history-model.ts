@@ -1,7 +1,13 @@
 import { DEFINITIONS, normalizePrefix, type Role } from './entities';
 import { MODES } from './modes-model';
 import type { EntityState, Hass } from './model';
+import { displayName, entityName } from './names';
 import { iconFor } from './visual';
+
+export interface StateItemOverride {
+  name?: string;
+  color?: string;
+}
 
 export interface StateHistoryConfig {
   type: string;
@@ -9,7 +15,29 @@ export interface StateHistoryConfig {
   entity_prefix: string;
   name_prefix: string;
   entities: string[];
+  items: Record<string, StateItemOverride>;
   grid_options?: Record<string, unknown>;
+}
+
+export const STATE_PALETTE = ['#0288d1', '#00acc1', '#26a69a', '#43a047', '#7cb342', '#fbc02d', '#ffa000', '#f4511e', '#e53935', '#d81b60', '#8e24aa', '#5e35b1', '#546e7a', '#9e9e9e'];
+
+function objectValue(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Configuration objet attendue');
+  return value as Record<string, unknown>;
+}
+
+export function stateItemOverride(value: unknown): StateItemOverride {
+  const raw = objectValue(value);
+  const result: StateItemOverride = {};
+  if (raw.name !== undefined) {
+    if (typeof raw.name !== 'string') throw new Error('Le nom doit être un texte');
+    result.name = raw.name;
+  }
+  if (raw.color !== undefined) {
+    if (typeof raw.color !== 'string') throw new Error('La couleur doit être un texte');
+    if (raw.color) result.color = raw.color;
+  }
+  return result;
 }
 
 const ICON_BY_SUFFIX = new Map<string, string>();
@@ -36,14 +64,29 @@ export function normalizeStateHistoryConfig(input: unknown): StateHistoryConfig 
   if (grid_options !== undefined && (!grid_options || typeof grid_options !== 'object' || Array.isArray(grid_options))) {
     throw new Error('grid_options doit être un objet');
   }
+  const items: Record<string, StateItemOverride> = {};
+  if (raw.items !== undefined) {
+    for (const [id, value] of Object.entries(objectValue(raw.items))) items[id] = stateItemOverride(value);
+  }
   return {
     type: 'custom:flowio-state-history-card',
     title,
     entity_prefix: normalizePrefix(raw.entity_prefix),
     name_prefix,
     entities: [...new Set(supplied)] as string[],
+    items,
     ...(grid_options ? { grid_options: grid_options as Record<string, unknown> } : {})
   };
+}
+
+export function stateLabel(config: StateHistoryConfig, id: string, state: EntityState | undefined, prefix: string): string {
+  const name = config.items[id]?.name;
+  if (name) return name;
+  return displayName(entityName(id, state), prefix);
+}
+
+export function stateActiveColor(config: StateHistoryConfig, id: string): string {
+  return config.items[id]?.color ?? '';
 }
 
 export function stateHistoryIds(hass: Hass | undefined, prefix: string): string[] {
