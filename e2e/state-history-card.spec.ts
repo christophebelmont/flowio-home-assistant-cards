@@ -6,8 +6,9 @@ test('carte historique des états : frise 24 h, marqueur horaire et couleurs', a
   await page.clock.install({ time: new Date('2026-10-29T12:00:00Z') });
   await page.goto('/demo/cards.html');
   const card = page.locator('flowio-state-history-card');
-  await expect(card.locator('h2')).toHaveText('Historique des états');
+  await expect(card.locator('h3.title')).toHaveText('Historique des états');
   await expect(card.locator('.day-badge')).toContainText('00:00 — 24:00');
+  await expect(card.locator('ha-card .card-head .title')).toBeVisible();
   await expect(card.locator('.board')).toBeVisible();
   await expect(card.locator('.row-name')).toHaveCount(5);
   await expect(card.locator('.track')).toHaveCount(5);
@@ -25,6 +26,12 @@ test('carte historique des états : frise 24 h, marqueur horaire et couleurs', a
   expect(trackColor).toBe('rgb(243, 245, 247)');
   const segColor = await card.locator('.track .seg').first().evaluate(el => getComputedStyle(el).backgroundColor);
   expect(segColor).toBe('rgb(255, 160, 0)');
+  const lineColor = await card.locator('.now-line').evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(lineColor).toBe('rgb(2, 136, 209)');
+  const labelColor = await card.locator('.axis .now-label').evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(labelColor).toBe('rgb(2, 136, 209)');
+  const titleColor = await card.locator('h3.title').evaluate(el => getComputedStyle(el).color);
+  expect(titleColor).toBe('rgb(32, 33, 36)');
 });
 
 test('carte historique des états : ordre et texte retiré devant les noms', async ({ page }) => {

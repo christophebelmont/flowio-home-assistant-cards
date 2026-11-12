@@ -1,7 +1,7 @@
 import { LitElement, html, css, nothing, type PropertyValues } from 'lit';
 import './order-list';
 import type { EntityState, Hass } from './model';
-import { baseStyles, historyStyles } from './card-styles';
+import { baseStyles } from './card-styles';
 import { onIntervals } from './history-data';
 import { commonEntityPrefix, displayName, entityName } from './names';
 import { mergeOrder, orderItems } from './order-list';
@@ -167,12 +167,12 @@ class FlowioStateHistoryCard extends LitElement {
     const nowPct = this.pct(this.now);
     const clock = clockTime(this.now, this.hass?.config?.time_zone);
     return html`
-      <header class=hero>
-        <ha-icon class=hero-icon icon=mdi:waveform aria-hidden=true></ha-icon>
-        <div class=hero-copy><h2>${config.title}</h2></div>
-        <span class=day-badge><ha-icon icon=mdi:calendar-range aria-hidden=true></ha-icon>00:00 — 24:00</span>
-      </header>
-      <ha-card class=fio-card><div class=body>
+      <ha-card><div class=body>
+        <div class=card-head>
+          <ha-icon class=head-icon icon=mdi:waveform aria-hidden=true></ha-icon>
+          <h3 class=title>${config.title}</h3>
+          <span class=day-badge><ha-icon icon=mdi:calendar-range aria-hidden=true></ha-icon>00:00 — 24:00</span>
+        </div>
         ${!config.entities.length ? html`<p class=message>Choisir les entités dans l’éditeur.</p>` : nothing}
         ${this.error ? html`<p class=warning role=alert>${this.error}</p>` : nothing}
         ${rows.length ? html`<div class=board>
@@ -190,27 +190,35 @@ class FlowioStateHistoryCard extends LitElement {
       </div></ha-card>`;
   }
 
-  static styles = [baseStyles, historyStyles, css`
-    :host>.hero .day-badge{margin-inline-start:auto;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--secondary-background-color);color:var(--secondary-text-color);font-size:calc(.78rem * var(--fio-font-scale, 1.32));font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
-    :host>.hero .day-badge ha-icon{--mdc-icon-size:18px}
-    .board{--fio-state-active:var(--fio-air,var(--accent-color,var(--primary-color)));display:grid;grid-template-columns:28px minmax(0,26%) minmax(0,1fr) auto;column-gap:12px;row-gap:12px;align-items:center;padding:16px;border:1px solid color-mix(in srgb,var(--fio-state-active) 22%,var(--divider-color));border-radius:13px;background:var(--fio-panel);box-shadow:0 2px 8px color-mix(in srgb,var(--fio-state-active) 6%,transparent)}
+  static styles = [baseStyles, css`
+    :host{--fio-state-active:var(--fio-air,var(--accent-color,var(--primary-color)));--fio-now:var(--fio-water)}
+    ha-card{overflow:hidden}
+    .body{padding:16px}
+    .card-head{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+    .head-icon{flex:0 0 auto;color:var(--fio-water);--mdc-icon-size:24px}
+    .title{margin:0;min-width:0;flex:1;font-size:calc(1.05rem * var(--fio-font-scale, 1.32));font-weight:650;line-height:1.25;letter-spacing:normal;color:var(--primary-text-color);overflow-wrap:anywhere}
+    .day-badge{margin-inline-start:auto;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--secondary-background-color);color:var(--secondary-text-color);font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .day-badge ha-icon{--mdc-icon-size:18px}
+    .board{display:grid;grid-template-columns:28px minmax(0,26%) minmax(0,1fr) auto;column-gap:12px;row-gap:12px;align-items:center}
     .row-icon{display:inline-flex;align-items:center;justify-content:center;color:var(--secondary-text-color)}
     .row-icon[data-on=true]{color:var(--fio-state-active)}
-    .row-icon ha-icon{--mdc-icon-size:24px}
-    .row-name{min-width:0;padding:0;border:0;background:none;text-align:left;font:inherit;font-weight:600;font-size:calc(.9rem * var(--fio-font-scale, 1.32));line-height:1.25;color:var(--primary-text-color);overflow-wrap:anywhere;cursor:pointer}
+    .row-icon ha-icon{--mdc-icon-size:22px}
+    .row-name{min-width:0;padding:0;border:0;background:none;text-align:left;font-family:inherit;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));font-weight:500;line-height:1.25;color:var(--primary-text-color);overflow-wrap:anywhere;cursor:pointer}
     .row-name:disabled{cursor:default;color:var(--secondary-text-color)}
-    .track{position:relative;height:14px;border-radius:999px;background:var(--secondary-background-color);box-shadow:inset 0 0 0 1px var(--divider-color)}
+    .track{position:relative;height:8px;border-radius:999px;background:var(--secondary-background-color);box-shadow:inset 0 0 0 1px var(--divider-color)}
     .seg{position:absolute;inset-block:0;border-radius:999px;background:var(--fio-state-active)}
-    .row-total{justify-self:end;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:calc(1rem * var(--fio-font-scale, 1.32))}
+    .row-total{justify-self:end;font-size:var(--ha-font-size-l, calc(1rem * var(--fio-font-scale, 1.32)));font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
     .now-track{position:relative;align-self:stretch;pointer-events:none}
-    .now-line{position:absolute;top:-6px;bottom:-14px;width:2px;transform:translateX(-50%);border-radius:2px;background:var(--fio-state-active)}
-    .now-dot{position:absolute;top:-12px;width:10px;height:10px;border-radius:50%;transform:translateX(-50%);background:var(--fio-state-active)}
-    .axis{position:relative;height:22px;margin-top:0;border-top:1px solid var(--divider-color);font-size:calc(.6rem * var(--fio-font-scale, 1.32));font-weight:600;color:var(--secondary-text-color);font-variant-numeric:tabular-nums}
+    .now-line{position:absolute;top:-6px;bottom:-14px;width:2px;transform:translateX(-50%);border-radius:2px;background:var(--fio-now)}
+    .now-dot{position:absolute;top:-12px;width:10px;height:10px;border-radius:50%;transform:translateX(-50%);background:var(--fio-now)}
+    .axis{position:relative;height:22px;border-top:1px solid var(--divider-color);font-size:var(--ha-font-size-s, calc(.6rem * var(--fio-font-scale, 1.32)));font-weight:600;color:var(--secondary-text-color);font-variant-numeric:tabular-nums}
     .tick{position:absolute;top:7px;white-space:nowrap}
     .tick.start{transform:translateX(0)}
     .tick.center{transform:translateX(-50%)}
     .tick.end{transform:translateX(-100%)}
-    .now-label{position:absolute;top:0;transform:translate(-50%,-50%);padding:3px 8px;border-radius:999px;background:var(--fio-state-active);color:var(--card-background-color);font-size:calc(.66rem * var(--fio-font-scale, 1.32));font-weight:700;white-space:nowrap;box-shadow:0 2px 6px color-mix(in srgb,var(--fio-state-active) 30%,transparent)}
+    .now-label{position:absolute;top:0;transform:translate(-50%,-50%);padding:3px 8px;border-radius:999px;background:var(--fio-now);color:var(--text-primary-color,#fff);font-size:var(--ha-font-size-s, calc(.66rem * var(--fio-font-scale, 1.32)));font-weight:700;white-space:nowrap;box-shadow:0 2px 6px color-mix(in srgb,var(--fio-now) 30%,transparent)}
+    .message{margin:8px 0;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));color:var(--secondary-text-color)}
+    .warning{margin:8px 0;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));color:var(--error-color)}
     @container(max-width:640px){.tick:nth-child(even){display:none}}
     @container(max-width:600px){.tick:not(:nth-child(1)):not(:nth-child(5)):not(:nth-child(9)){display:none}}
     @media (prefers-reduced-motion: reduce){*{transition:none!important}}
