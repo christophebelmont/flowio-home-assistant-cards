@@ -3,7 +3,8 @@
 ## 0.3.5 — en préparation
 
 - Nouvelle carte `custom:flowio-state-history-card` : frise des états booléens (interrupteurs et capteurs binaires) sur les 24 h du jour, piste grise hors activation, icônes et segments à la couleur d'activation, barre verticale de l'heure courante, choix des entités, classement par glisser-déposer et texte retiré devant les noms. L'éditeur permet un nom affiché et une couleur d'activation par entité (`items[<entité>]`).
-- Carte Équipements : une puce ronde rouge signale en haut à droite de l'icône l'équipement en forçage temporaire, détecté par l'attribut booléen `forced` (`true`/`false`) de l'entité de l'actionneur.
+- Popups (tooltips) des graphiques ApexCharts : fond et texte forcés sur les variables du thème Home Assistant, pour rester lisibles en thème sombre même quand la détection du mode sombre échoue.
+- Carte Équipements : quand l'attribut booléen `forced` (`true`/`false`) de l'entité de l'actionneur est actif, un libellé « [Forcé] » multilingue s'affiche à droite de l'état et le cadre de la tuile passe au rouge avec une animation « serpent » lente.
 - Ajout du paramètre permanent `mqtt_topic` à la carte, distinct du préfixe Home Assistant et disponible dans l’éditeur visuel.
 - La popup Maintenance lit automatiquement l’état des alarmes via le topic MQTT configuré ; la saisie locale du topic est supprimée.
 - Les souscriptions MQTT sont fermées à la fermeture de la popup, au changement de topic, de préfixe ou de connexion ; les messages d’une ancienne cible sont ignorés.

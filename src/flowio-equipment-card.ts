@@ -1,5 +1,5 @@
 import { FlowioTileGridCard, FlowioTileGridEditor, normalizeTileGridConfig, type TileGridConfig } from './tile-grid';
-import { equipmentForced } from './override-model';
+import { equipmentForced, forcedLabel } from './override-model';
 
 export function normalizeEquipmentConfig(input: unknown): TileGridConfig {
   return normalizeTileGridConfig(input, 'custom:flowio-equipment-card', 'Équipements');
@@ -7,7 +7,9 @@ export function normalizeEquipmentConfig(input: unknown): TileGridConfig {
 
 class FlowioEquipmentCard extends FlowioTileGridCard {
   protected normalizeConfig(input: unknown): TileGridConfig { return normalizeEquipmentConfig(input); }
-  protected tileFlag(entity: string): boolean { return equipmentForced(this.hass, entity); }
+  protected tileForcedLabel(entity: string): string | undefined {
+    return equipmentForced(this.hass, entity) ? `[${forcedLabel(this.hass)}]` : undefined;
+  }
   static getConfigElement() { return document.createElement('flowio-equipment-card-editor'); }
   static getStubConfig(): TileGridConfig { return normalizeEquipmentConfig({}); }
 }

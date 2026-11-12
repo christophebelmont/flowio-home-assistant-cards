@@ -48,6 +48,14 @@ export function normalizeTileGridConfig(input: unknown, type: string, defaultTit
 type NativeCard = HTMLElement & { hass?: Hass; setConfig: (config: Record<string, unknown>) => void };
 type CardHelpers = { createCardElement: (config: Record<string, unknown>) => NativeCard };
 
+if (typeof CSS !== 'undefined' && typeof CSS.registerProperty === 'function') {
+  try {
+    CSS.registerProperty({ name: '--fio-snake', syntax: '<angle>', inherits: false, initialValue: '0deg' });
+  } catch {
+    // propriété déjà enregistrée
+  }
+}
+
 export abstract class FlowioTileGridCard extends LitElement {
   static properties = { hass: { attribute: false }, config: { state: true }, error: { state: true } };
   declare hass?: Hass;
@@ -63,7 +71,7 @@ export abstract class FlowioTileGridCard extends LitElement {
 
   protected abstract normalizeConfig(input: unknown): TileGridConfig;
 
-  protected tileFlag(_entity: string): boolean { return false; }
+  protected tileForcedLabel(_entity: string): string | undefined { return undefined; }
 
   setConfig(input: unknown) {
     this.config = this.normalizeConfig(input);
@@ -91,16 +99,18 @@ export abstract class FlowioTileGridCard extends LitElement {
         this.slots[index] = slot;
       }
       let overlay = this.overlays[index];
-      if (this.tileFlag(entities[index] ?? '')) {
+      const label = this.tileForcedLabel(entities[index] ?? '');
+      slot.dataset.forced = label ? 'true' : 'false';
+      if (label) {
         if (!overlay) {
           overlay = document.createElement('span');
-          overlay.className = 'tile-flag';
+          overlay.className = 'tile-forced';
           overlay.setAttribute('role', 'img');
-          overlay.setAttribute('aria-label', 'Forçage actif');
-          overlay.title = 'Forçage actif';
           slot.append(overlay);
           this.overlays[index] = overlay;
         }
+        overlay.textContent = label;
+        overlay.setAttribute('aria-label', label);
       } else if (overlay) {
         overlay.remove();
         this.overlays[index] = undefined;
@@ -170,8 +180,10 @@ export abstract class FlowioTileGridCard extends LitElement {
     .message{margin:0;font-size:calc(.82rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
     .grid{display:grid;grid-template-columns:repeat(var(--columns,2),minmax(0,1fr));gap:10px}
     .grid>*{display:block;min-width:0}
-    .tile-slot{position:relative;display:block;min-width:0}
-    .tile-flag{position:absolute;top:11px;left:41px;width:12px;height:12px;border-radius:50%;background:var(--error-color,#db4437);box-shadow:0 0 0 2px var(--ha-card-background,var(--card-background-color,#fff));z-index:1;pointer-events:none}
+    .tile-slot{position:relative;display:block;min-width:0;border-radius:var(--fio-tile-radius,14px)}
+    .tile-forced{position:absolute;left:128px;top:calc(50% + 9px);transform:translateY(-50%);z-index:2;color:var(--error-color);font-size:calc(.8rem * var(--fio-font-scale, 1.32));font-weight:600;line-height:1;white-space:nowrap;pointer-events:none}
+    .tile-slot[data-forced=true]::after{content:'';position:absolute;inset:-1px;padding:2px;border-radius:inherit;background:var(--error-color);background:conic-gradient(from var(--fio-snake),var(--error-color) 0deg,color-mix(in srgb,var(--error-color) 30%,transparent) 55deg,transparent 95deg,transparent 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;animation:fio-snake 5s linear infinite;pointer-events:none;z-index:1}
+    @keyframes fio-snake{to{--fio-snake:360deg}}
     @container(max-width:420px){.grid{grid-template-columns:minmax(0,1fr)}}
   `;
 }

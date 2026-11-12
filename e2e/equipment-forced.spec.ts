@@ -4,7 +4,7 @@ test('carte équipements : puce de forçage sur l’équipement actuellement for
   await page.goto('/demo/cards.html');
   const card = page.locator('flowio-equipment-card');
   await expect(card.locator('.tile-slot')).toHaveCount(7);
-  await expect(card.locator('.tile-flag')).toHaveCount(0);
+  await expect(card.locator('.tile-forced')).toHaveCount(0);
   await page.evaluate(() => {
     const el = document.querySelector('flowio-equipment-card') as any;
     const states = { ...el.hass.states };
@@ -12,7 +12,8 @@ test('carte équipements : puce de forçage sur l’équipement actuellement for
     states['switch.fio_io_flt_pmp'] = { ...current, attributes: { ...current.attributes, forced: true } };
     el.hass = { ...el.hass, states };
   });
-  await expect(card.locator('.tile-flag')).toHaveCount(1);
-  await expect(card.locator('.tile-slot').first().locator('.tile-flag')).toHaveCount(1);
-  await expect(card.locator('.tile-flag')).toHaveAttribute('aria-label', 'Forçage actif');
+  await expect(card.locator('.tile-forced')).toHaveCount(1);
+  await expect(card.locator('.tile-slot').first().locator('.tile-forced')).toHaveText('[Forcé]');
+  await expect(card.locator('.tile-slot').first()).toHaveAttribute('data-forced', 'true');
+  await expect(card.locator('.tile-slot').nth(1)).toHaveAttribute('data-forced', 'false');
 });

@@ -65,3 +65,23 @@ export function equipmentForced(hass: Hass | undefined, id: string): boolean {
   const value = hass?.states[id]?.attributes.forced;
   return value === true || value === 'true';
 }
+
+const FORCED_LABELS: Record<string, string> = {
+  fr: 'Forcé',
+  en: 'Forced',
+  de: 'Erzwungen',
+  es: 'Forzado',
+  it: 'Forzato',
+  nl: 'Geforceerd',
+  pt: 'Forçado',
+  pl: 'Wymuszone',
+  ru: 'Принудительно',
+  uk: 'Примусово'
+};
+
+export function forcedLabel(hass?: Hass): string {
+  const source = hass as (Hass & { language?: string; locale?: { language?: string } }) | undefined;
+  const language = source?.locale?.language ?? source?.language ?? 'en';
+  const key = language.slice(0, 2).toLowerCase();
+  return FORCED_LABELS[key] ?? FORCED_LABELS.en;
+}
