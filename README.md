@@ -26,6 +26,8 @@ Cartes de supervision et de pilotage pour les entités MQTT du firmware Flow.io-
 - `custom:flowio-pool-card` : jauges pH/ORP/pression, températures, équipements, modes, alarmes, cuves et frise de filtration.
 - `custom:flowio-history-card` : courbes ApexCharts alimentées par l'historique Home Assistant/Recorder.
 - `custom:flowio-state-history-card` : frise des états booléens (interrupteurs et capteurs binaires) sur les 24 h du jour, avec position de l'heure courante.
+- `custom:flowio-actuator-card` : tableau des actionneurs (nom, durées jour/semaine/mois/total) avec remise à zéro par ligne et globale.
+- `custom:flowio-alarm-detail-card` : tableau des alarmes (déclenchement, condition, latch) avec acquittement par ligne et global.
 
 Les cartes reprennent le thème Home Assistant et les motifs visuels Flow.io déjà établis. Elles privilégient les composants natifs de l’instance, notamment `ha-switch`, `ha-button`, `ha-icon` et la carte native de titre ; aucun substitut de ces contrôles n’est inclus dans le bundle de production.
 
@@ -257,7 +259,7 @@ Le Recorder doit fournir les historiques des entités choisies. Les valeurs calc
 
 ```yaml
 type: custom:flowio-state-history-card
-title: Historique des états
+title: Historique
 entity_prefix: fio
 name_prefix: Flow.io Waveshare
 entities:
@@ -266,7 +268,45 @@ entities:
   - binary_sensor.fio_alm_any_active
 ```
 
-Une frise par entité couvre les 24 heures de la journée en cours : la piste reste grise quand l'état est inactif et prend la couleur d'activation quand il est actif (`on` ou `true`), l'icône s'allume avec l'état et une barre verticale marque l'heure courante, avec la durée d'activation du jour à droite. Les entités se choisissent dans la liste des interrupteurs et capteurs binaires du préfixe (`switch.*` et `binary_sensor.*`) ; `name_prefix` retire un texte devant les noms (vide = détection automatique) et l'ordre d'affichage se règle par glisser-déposer dans l'éditeur. Chaque entité peut être personnalisée via `items[<entité>]` : `name` (nom affiché, remplace le préfixe retiré) et `color` (couleur d'activation, choisie par pastilles dans l'éditeur ou code CSS ; vide = couleur d'activation par défaut). Les données viennent du Recorder ; une entité absente n'est pas transformée en zéro.
+Une frise par entité couvre les 24 heures de la journée en cours : la piste reste grise quand l'état est inactif et prend la couleur d'activation quand il est actif (`on` ou `true`), l'icône s'allume avec l'état et un badge en haut de la frise marque l'heure courante, avec la durée d'activation du jour à droite. Les entités se choisissent dans la liste des interrupteurs et capteurs binaires du préfixe (`switch.*` et `binary_sensor.*`) ; `name_prefix` retire un texte devant les noms (vide = détection automatique) et l'ordre d'affichage se règle par glisser-déposer dans l'éditeur. Chaque entité peut être personnalisée via `items[<entité>]` : `name` (nom affiché, remplace le préfixe retiré) et `color` (couleur d'activation, choisie par pastilles dans l'éditeur ou code CSS ; vide = couleur d'activation par défaut). Les données viennent du Recorder ; une entité absente n'est pas transformée en zéro.
+
+## Équipements du bassin
+
+![Carte Flow.io — Équipements du bassin](docs/flowio-actuator-card.png)
+
+```yaml
+type: custom:flowio-actuator-card
+title: Équipements du bassin
+subtitle: Contrôle et suivi de consommation
+entity_prefix: fio
+entities:
+  - switch.fio_io_flt_pmp
+  - switch.fio_io_ph_pmp
+  - switch.fio_io_chl_pmp
+  - switch.fio_io_robot
+  - switch.fio_io_fill_pmp
+  - switch.fio_io_chl_gen
+resets:
+  switch.fio_io_robot: button.fio_pd_reset_upt_robot
+```
+
+Tableau des actionneurs sans interrupteur : nom, icône et durées de fonctionnement **jour / semaine / mois / total**, lues dans les attributs de chaque entité de commutation (`runtime_day`, `runtime_week`, `runtime_month`, `runtime_total` par défaut, modifiables via `runtime_keys`). L'icône prend la couleur d'activation quand l'actionneur est en marche (`on`), sinon elle reste neutre. Les durées nulles sont grisées. Un bouton ↺ en fin de ligne remet à zéro les compteurs de l'actionneur (`button.<préfixe>_pd_reset_upt_*`), et « Tout remettre à zéro » cible `button.<préfixe>_pd_reset_upt_all`. Le mapping rôle → remise à zéro couvre filtration, pompe pH, désinfection, électrolyseur et remplissage ; les autres actionneurs se règlent via `resets[<entité>]`. Les commandes demandent confirmation. L'éditeur permet de choisir le titre, le sous-titre, le préfixe, le texte à retirer devant les noms et la liste des actionneurs, et l'ordre se règle par glisser-déposer.
+
+## Gestion des alarmes
+
+![Carte Flow.io — Gestion des alarmes](docs/flowio-alarm-detail-card.png)
+
+```yaml
+type: custom:flowio-alarm-detail-card
+title: Gestion des alarmes
+entity_prefix: fio
+alarms:
+  - binary_sensor.fio_alm_1_active
+  - binary_sensor.fio_alm_2_active
+  - binary_sensor.fio_alm_3_active
+```
+
+Tableau des alarmes : nom, **déclenchement** (`attributes.triggered_at`/`last_triggered`, sinon —), **condition** (`Active`/`Inactive`/`Indisponible` selon l'état du `binary_sensor`), **latch** (`Libre`/`Non utilisé` selon `attributes.latch`) et **action**. Les alarmes en latch proposent un bouton **Acquitter** (`button.<préfixe>_alm_<id>_reset`) ; les autres affichent « Automatique ». Un en-tête récapitule « N alarmes · M à acquitter » et un bouton **« Acquitter les disponibles »** traite toutes les alarmes actives acquittables. Les commandes demandent confirmation. Les alarmes se choisissent dans la liste `binary_sensor.<préfixe>_alm_*_active` (éditeur), avec `name_prefix` pour retirer un texte devant les noms et classement par glisser-déposer.
 
 ## Commandes et limites
 

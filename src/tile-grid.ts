@@ -182,8 +182,8 @@ export abstract class FlowioTileGridCard extends LitElement {
     .grid>*{display:block;min-width:0}
     .tile-slot{position:relative;display:block;min-width:0;border-radius:var(--fio-tile-radius,14px)}
     .tile-forced{position:absolute;right:12px;top:calc(50% + 9px);transform:translateY(-50%);z-index:2;color:var(--secondary-text-color);font-size:var(--ha-font-size-s, .8rem);font-weight:400;line-height:1;white-space:nowrap;pointer-events:none}
-    .tile-slot[data-forced=true]::after{content:'';position:absolute;inset:-1px;padding:2px;border-radius:inherit;background:var(--error-color);background:conic-gradient(from var(--fio-snake),var(--error-color) 0deg,color-mix(in srgb,var(--error-color) 25%,transparent) 55deg,transparent 90deg,transparent 180deg,var(--error-color) 180deg,color-mix(in srgb,var(--error-color) 25%,transparent) 235deg,transparent 270deg,transparent 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;animation:fio-snake 2s ease-in-out infinite;pointer-events:none;z-index:1}
-    @keyframes fio-snake{0%{--fio-snake:0deg}50%{--fio-snake:270deg}100%{--fio-snake:360deg}}
+    .tile-slot[data-forced=true]::after{content:'';position:absolute;inset:-1px;padding:2px;border-radius:inherit;background:var(--error-color);background:conic-gradient(from var(--fio-snake),var(--error-color) 0deg,color-mix(in srgb,var(--error-color) 25%,transparent) 55deg,transparent 90deg,transparent 180deg,var(--error-color) 180deg,color-mix(in srgb,var(--error-color) 25%,transparent) 235deg,transparent 270deg,transparent 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;animation:fio-snake 1.5s ease-in-out infinite;pointer-events:none;z-index:1}
+    @keyframes fio-snake{0%{--fio-snake:0deg}33.333%{--fio-snake:360deg}100%{--fio-snake:720deg}}
     @container(max-width:420px){.grid{grid-template-columns:minmax(0,1fr)}}
   `;
 }

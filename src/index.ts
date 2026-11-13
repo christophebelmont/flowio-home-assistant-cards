@@ -12,3 +12,5 @@ import './flowio-graph-card';
 import './flowio-pool-card';
 import './flowio-history-card';
 import './flowio-state-history-card';
+import './flowio-actuator-card';
+import './flowio-alarm-detail-card';

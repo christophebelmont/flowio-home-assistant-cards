@@ -52,7 +52,7 @@ for (const mode of Object.values(MODES)) {
 export function normalizeStateHistoryConfig(input: unknown): StateHistoryConfig {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Configuration objet attendue');
   const raw = input as Record<string, unknown>;
-  const title = raw.title ?? 'Historique des états';
+  const title = raw.title ?? 'Historique';
   if (typeof title !== 'string' || !title.trim()) throw new Error('Titre invalide');
   const name_prefix = raw.name_prefix ?? '';
   if (typeof name_prefix !== 'string') throw new Error('name_prefix doit être un texte');

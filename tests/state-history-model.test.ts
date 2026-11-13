@@ -17,7 +17,7 @@ const state = (s: string, attributes: Record<string, unknown> = {}) => ({ state:
 
 it('applique les valeurs par défaut de l’historique des états', () => {
   const config = normalizeStateHistoryConfig({});
-  expect(config.title).toBe('Historique des états');
+  expect(config.title).toBe('Historique');
   expect(config.entity_prefix).toBe('fio');
   expect(config.name_prefix).toBe('');
   expect(config.entities).toEqual([]);

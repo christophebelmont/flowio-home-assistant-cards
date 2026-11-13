@@ -178,13 +178,12 @@ class FlowioStateHistoryCard extends LitElement {
         ${this.error ? html`<p class=warning role=alert>${this.error}</p>` : nothing}
         ${rows.length ? html`<div class=board>
           ${rows.map((row, index) => this.row(row, index))}
-          <span class=now-track style=${`grid-row:1 / span ${rows.length};grid-column:3`} aria-hidden=true>
-            <span class=now-line style=${`left:${nowPct}%`}></span>
-            <span class=now-dot style=${`left:${nowPct}%`}></span>
+          <span class=now-track style=${`grid-row:1 / span ${rows.length};grid-column:3`}>
+            <span class=now-line style=${`left:${nowPct}%`} aria-hidden=true></span>
+            <span class=now-label style=${`left:${nowPct}%`}>${clock}</span>
           </span>
           <div class=axis style=${`grid-row:${rows.length + 1};grid-column:3`}>
             ${TICKS.map((tick, index) => html`<span class=${`tick ${index === 0 ? 'start' : index === TICKS.length - 1 ? 'end' : 'center'}`} style=${`left:${index / (TICKS.length - 1) * 100}%`}>${tick}</span>`)}
-            <span class=now-label style=${`left:${nowPct}%`}>${clock}</span>
           </div>
         </div>` : nothing}
         ${this.loading ? html`<p class=message role=status>Chargement des historiques…</p>` : nothing}
@@ -196,7 +195,7 @@ class FlowioStateHistoryCard extends LitElement {
     ha-card{overflow:hidden}
     .body{padding:16px}
     .title{margin:0 0 14px;min-width:0;font-size:calc(1.05rem * var(--fio-font-scale, 1.32));font-weight:650;line-height:1.25;letter-spacing:normal;color:var(--primary-text-color);overflow-wrap:anywhere}
-    .board{display:grid;grid-template-columns:28px minmax(0,26%) minmax(0,1fr) auto;column-gap:12px;row-gap:12px;align-items:center}
+    .board{display:grid;grid-template-columns:28px minmax(0,26%) minmax(0,1fr) auto;column-gap:12px;row-gap:12px;align-items:center;padding-top:24px}
     .row-icon{display:inline-flex;align-items:center;justify-content:center;color:var(--secondary-text-color)}
     .row-icon[data-on=true]{color:var(--fio-state-active)}
     .row-icon ha-icon{--mdc-icon-size:22px}
@@ -206,14 +205,13 @@ class FlowioStateHistoryCard extends LitElement {
     .seg{position:absolute;inset-block:0;border-radius:999px;background:var(--fio-state-active)}
     .row-total{justify-self:end;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));font-weight:400;font-variant-numeric:tabular-nums;white-space:nowrap}
     .now-track{position:relative;align-self:stretch;pointer-events:none}
-    .now-line{position:absolute;top:-6px;bottom:-14px;width:2px;transform:translateX(-50%);border-radius:2px;background:var(--fio-now)}
-    .now-dot{position:absolute;top:-12px;width:10px;height:10px;border-radius:50%;transform:translateX(-50%);background:var(--fio-now)}
+    .now-line{position:absolute;top:0;bottom:-14px;width:2px;transform:translateX(-50%);border-radius:2px;background:var(--fio-now)}
     .axis{position:relative;height:22px;border-top:1px solid var(--divider-color);font-size:var(--ha-font-size-s, calc(.6rem * var(--fio-font-scale, 1.32)));font-weight:600;color:var(--secondary-text-color);font-variant-numeric:tabular-nums}
     .tick{position:absolute;top:7px;white-space:nowrap}
     .tick.start{transform:translateX(0)}
     .tick.center{transform:translateX(-50%)}
     .tick.end{transform:translateX(-100%)}
-    .now-label{position:absolute;top:-5px;transform:translate(-50%,-50%);padding:3px 8px;border-radius:999px;background:var(--fio-now);color:var(--text-primary-color,#fff);font-size:var(--ha-font-size-s, calc(.66rem * var(--fio-font-scale, 1.32)));font-weight:700;white-space:nowrap;box-shadow:0 2px 6px color-mix(in srgb,var(--fio-now) 30%,transparent)}
+    .now-label{position:absolute;top:-24px;transform:translateX(-50%);padding:3px 8px;border-radius:999px;background:var(--fio-now);color:var(--text-primary-color,#fff);font-size:var(--ha-font-size-s, calc(.66rem * var(--fio-font-scale, 1.32)));font-weight:700;white-space:nowrap;box-shadow:0 2px 6px color-mix(in srgb,var(--fio-now) 30%,transparent)}
     .message{margin:8px 0;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));color:var(--secondary-text-color)}
     .warning{margin:8px 0;font-size:var(--ha-font-size-m, calc(.9rem * var(--fio-font-scale, 1.32)));color:var(--error-color)}
     @container(max-width:640px){.tick:nth-child(even){display:none}}

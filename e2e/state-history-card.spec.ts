@@ -6,7 +6,7 @@ test('carte historique des états : frise 24 h, marqueur horaire et couleurs', a
   await page.clock.install({ time: new Date('2026-10-29T12:00:00Z') });
   await page.goto('/demo/cards.html');
   const card = page.locator('flowio-state-history-card');
-  await expect(card.locator('h3.title')).toHaveText('Historique des états');
+  await expect(card.locator('h3.title')).toHaveText('Historique');
   await expect(card.locator('.day-badge')).toHaveCount(0);
   await expect(card.locator('ha-card .card-head')).toHaveCount(0);
   await expect(card.locator('.board')).toBeVisible();
@@ -14,8 +14,8 @@ test('carte historique des états : frise 24 h, marqueur horaire et couleurs', a
   await expect(card.locator('.track')).toHaveCount(5);
   expect(await card.locator('.track .seg').count()).toBeGreaterThan(0);
   await expect(card.locator('.now-line')).toHaveCount(1);
-  await expect(card.locator('.now-dot')).toHaveCount(1);
-  await expect(card.locator('.axis .now-label')).toHaveText(/^\d{2}:\d{2}$/);
+  await expect(card.locator('.now-dot')).toHaveCount(0);
+  await expect(card.locator('.now-label')).toHaveText(/^\d{2}:\d{2}$/);
   const ticks = card.locator('.axis > span:not(.now-label)');
   await expect(ticks).toHaveCount(9);
   await expect(ticks).toHaveText(['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00', '24:00']);
@@ -28,7 +28,7 @@ test('carte historique des états : frise 24 h, marqueur horaire et couleurs', a
   expect(segColor).toBe('rgb(255, 160, 0)');
   const lineColor = await card.locator('.now-line').evaluate(el => getComputedStyle(el).backgroundColor);
   expect(lineColor).toBe('rgb(2, 136, 209)');
-  const labelColor = await card.locator('.axis .now-label').evaluate(el => getComputedStyle(el).backgroundColor);
+  const labelColor = await card.locator('.now-label').evaluate(el => getComputedStyle(el).backgroundColor);
   expect(labelColor).toBe('rgb(2, 136, 209)');
   const titleColor = await card.locator('h3.title').evaluate(el => getComputedStyle(el).color);
   expect(titleColor).toBe('rgb(32, 33, 36)');
