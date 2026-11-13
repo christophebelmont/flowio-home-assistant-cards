@@ -8,7 +8,6 @@ import {
   alarmPendingCount,
   alarmResetEntity,
   detectedAlarmIds,
-  formatTrigger,
   normalizeAlarmDetailConfig
 } from '../src/alarm-detail-model';
 import type { Hass } from '../src/model';
@@ -62,9 +61,7 @@ it('construit le détail et compte les alarmes à acquitter', () => {
   expect(alarmPendingCount(entries)).toBe(1);
 });
 
-it('formate le déclenchement et la condition', () => {
-  expect(formatTrigger(undefined)).toBe('—');
-  expect(formatTrigger(Date.parse('2026-10-29T12:00:00Z'))).toMatch(/^\d{2}\/\d{2} \d{2}:\d{2}$/);
+it('formate la condition', () => {
   expect(alarmConditionLabel(state('on')).tone).toBe('active');
   expect(alarmConditionLabel(state('off'))).toEqual({ label: 'Inactive', tone: 'inactive' });
   expect(alarmConditionLabel(state('off', { condition: 'true' })).tone).toBe('active');

@@ -11,7 +11,6 @@ import {
   alarmNamePrefix,
   alarmPendingCount,
   detectedAlarmIds,
-  formatTrigger,
   normalizeAlarmDetailConfig,
   type AlarmDetail,
   type AlarmDetailConfig
@@ -74,7 +73,6 @@ class FlowioAlarmDetailCard extends LitElement {
         <span class=icon-plate data-tone=${entry.active ? 'active' : 'neutral'}><ha-icon .icon=${icon} aria-hidden=true></ha-icon></span>
         <button type=button class=name-button ?disabled=${!entry.present} @click=${() => this.more(entry.entityId)}>${name}</button>
       </div>
-      <span class=c-trigger>${formatTrigger(entry.triggeredAt)}</span>
       <span class=c-condition><span class="pill" data-tone=${badge.tone}>${badge.label}</span></span>
       <span class=c-action>
         ${entry.latched
@@ -103,7 +101,6 @@ class FlowioAlarmDetailCard extends LitElement {
       ${!entries.length ? html`<p class=empty>Choisir les alarmes dans l’éditeur.</p>` : html`<div class=table-scroll><div class=table>
         <div class="row head" aria-hidden=true>
           <span class=c-name>Alarme</span>
-          <span class=c-trigger>Déclenchement</span>
           <span class=c-condition>Condition</span>
           <span class=c-action>Action</span>
         </div>
@@ -124,7 +121,7 @@ class FlowioAlarmDetailCard extends LitElement {
     ha-button.ack-all{--ha-button-height:42px;--ha-button-border-radius:12px;--wa-color-on-normal:var(--fio-success);font-size:calc(.78rem * var(--fio-font-scale, 1.32))}
     .table-scroll{overflow-x:auto;margin:0 -4px}
     .table{display:flex;flex-direction:column;min-width:720px}
-    .row{display:grid;grid-template-columns:minmax(200px,2fr) minmax(110px,1fr) minmax(100px,1fr) 56px;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--divider-color)}
+    .row{display:grid;grid-template-columns:minmax(200px,2fr) minmax(100px,1fr) 56px;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--divider-color)}
     .row.head{padding:8px 4px;border-bottom:2px solid var(--divider-color)}
     .row.head span{font-size:calc(.64rem * var(--fio-font-scale, 1.32));font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--secondary-text-color)}
     .row:last-child{border-bottom:0}
@@ -134,7 +131,6 @@ class FlowioAlarmDetailCard extends LitElement {
     .icon-plate ha-icon{--mdc-icon-size:24px}
     .name-button{min-width:0;padding:0;border:0;background:none;text-align:left;font-family:inherit;font-size:var(--ha-font-size-m, .92rem);font-weight:500;line-height:1.25;color:var(--primary-text-color);overflow-wrap:anywhere;cursor:pointer}
     .name-button:disabled{cursor:default;color:var(--secondary-text-color)}
-    .c-trigger{font-size:var(--ha-font-size-s, .8rem);color:var(--secondary-text-color);font-variant-numeric:tabular-nums}
     .pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:8px;font-size:var(--ha-font-size-s, .8rem);font-weight:600;white-space:nowrap;background:var(--secondary-background-color);color:var(--secondary-text-color)}
     .pill[data-tone=active]{background:color-mix(in srgb,var(--error-color) 14%,var(--fio-surface));color:var(--error-color)}
     .pill[data-tone=latched]{background:color-mix(in srgb,var(--fio-warning) 16%,var(--fio-surface));color:var(--fio-warning)}
@@ -148,7 +144,7 @@ class FlowioAlarmDetailCard extends LitElement {
     ha-button.ack ha-icon{--mdc-icon-size:20px}
     .empty{margin:0;font-size:calc(.82rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
     .error{margin:0 0 10px;font-size:calc(.78rem * var(--fio-font-scale, 1.32));color:var(--error-color)}
-    @container(max-width:560px){.table{min-width:520px}.row{grid-template-columns:minmax(150px,2fr) minmax(90px,1fr) minmax(90px,1fr) 52px;gap:8px}.icon-plate{flex-basis:34px;width:34px;height:34px}}
+    @container(max-width:560px){.table{min-width:420px}.row{grid-template-columns:minmax(150px,2fr) minmax(90px,1fr) 52px;gap:8px}.icon-plate{flex-basis:34px;width:34px;height:34px}}
     @media (prefers-reduced-motion: reduce){*{transition:none!important}}
   `;
 }

@@ -19,7 +19,6 @@ export interface AlarmDetail {
   active: boolean;
   condition: boolean;
   present: boolean;
-  triggeredAt?: number;
   latched: boolean;
   canReset: boolean;
 }
@@ -109,18 +108,6 @@ export function alarmResettable(state: EntityState | undefined): boolean | undef
   return booleanAttr(state?.attributes.resettable);
 }
 
-export function alarmTriggeredAt(state: EntityState | undefined): number | undefined {
-  for (const key of ['triggered_at', 'last_triggered', 'triggered']) {
-    const value = state?.attributes[key];
-    if (typeof value === 'string' && value.trim()) {
-      const time = Date.parse(value);
-      if (Number.isFinite(time)) return time;
-    }
-    if (typeof value === 'number' && Number.isFinite(value)) return value > 1e12 ? value : value * 1000;
-  }
-  return undefined;
-}
-
 export function alarmDetailEntries(hass: Hass | undefined, config: AlarmDetailConfig): AlarmDetail[] {
   const prefix = config.entity_prefix;
   const ids = config.alarms.length ? config.alarms : detectedAlarmIds(hass, prefix);
@@ -140,7 +127,6 @@ export function alarmDetailEntries(hass: Hass | undefined, config: AlarmDetailCo
       active: state?.state === 'on',
       condition: alarmCondition(state),
       present: !!state,
-      triggeredAt: alarmTriggeredAt(state),
       latched: alarmLatched(state),
       canReset: resettable ?? (!!resetState && !['unavailable', ''].includes(resetState.state))
     };
@@ -149,16 +135,6 @@ export function alarmDetailEntries(hass: Hass | undefined, config: AlarmDetailCo
 
 export function alarmPendingCount(entries: readonly AlarmDetail[]): number {
   return entries.filter(entry => entry.latched && entry.canReset).length;
-}
-
-export function formatTrigger(ms: number | undefined): string {
-  if (ms === undefined) return '—';
-  try {
-    return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).format(ms);
-  } catch {
-    const date = new Date(ms);
-    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-  }
 }
 
 export function alarmConditionLabel(state: EntityState | undefined): { label: string; tone: 'active' | 'latched' | 'inactive' | 'unknown' } {
