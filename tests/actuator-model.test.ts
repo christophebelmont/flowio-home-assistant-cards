@@ -18,7 +18,7 @@ it('applique les valeurs par défaut', () => {
   expect(config.subtitle).toBe('Contrôle et suivi de consommation');
   expect(config.entity_prefix).toBe('fio');
   expect(config.entities).toEqual([]);
-  expect(config.runtime_keys).toEqual({ day: 'runtime_day', week: 'runtime_week', month: 'runtime_month', total: 'runtime_total' });
+  expect(config.runtime_keys).toEqual({ day: 'uptime_day_s', week: 'uptime_week_s', month: 'uptime_month_s', total: 'uptime_total_s' });
   expect(config.resets).toEqual({});
 });
 
@@ -30,7 +30,7 @@ it('accepte les clés d’attributs et les remises à zéro personnalisées', ()
   });
   expect(config.entities).toEqual(['switch.a']);
   expect(config.runtime_keys.day).toBe('upt_day');
-  expect(config.runtime_keys.week).toBe('runtime_week');
+  expect(config.runtime_keys.week).toBe('uptime_week_s');
   expect(config.resets).toEqual({ 'switch.a': 'button.reset_a' });
 });
 

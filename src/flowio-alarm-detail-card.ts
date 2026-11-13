@@ -77,7 +77,7 @@ class FlowioAlarmDetailCard extends LitElement {
       <span class=c-latch><span class="pill" data-latch=${entry.latched ? 'true' : 'false'}>${entry.latched ? 'Libre' : 'Non utilisé'}</span></span>
       <span class=c-action>
         ${entry.latched
-          ? html`<ha-button class=ack appearance=accent .disabled=${!canAck || !!this.busy} .accessibleLabel=${`Acquitter ${name}`} @click=${() => this.press([entry], `Acquitter « ${name} » ? Le firmware vérifiera que la cause a disparu.`)}>Acquitter</ha-button>`
+          ? html`<ha-button class=ack appearance=plain title=${`Acquitter ${name}`} .disabled=${!canAck || !!this.busy} .accessibleLabel=${`Acquitter ${name}`} @click=${() => this.press([entry], `Acquitter « ${name} » ? Le firmware vérifiera que la cause a disparu.`)}><ha-icon slot=start icon=mdi:refresh aria-hidden=true></ha-icon></ha-button>`
           : html`<span class=auto>Automatique</span>`}
       </span>
     </div>`;
@@ -124,27 +124,30 @@ class FlowioAlarmDetailCard extends LitElement {
     ha-button.ack-all{--ha-button-height:42px;--ha-button-border-radius:12px;--wa-color-on-normal:var(--fio-success);font-size:calc(.78rem * var(--fio-font-scale, 1.32))}
     .table-scroll{overflow-x:auto;margin:0 -4px}
     .table{display:flex;flex-direction:column;min-width:720px}
-    .row{display:grid;grid-template-columns:minmax(200px,2fr) minmax(110px,1fr) minmax(100px,1fr) minmax(110px,1fr) 190px;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--divider-color)}
+    .row{display:grid;grid-template-columns:minmax(200px,2fr) minmax(110px,1fr) minmax(100px,1fr) minmax(110px,1fr) 56px;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--divider-color)}
     .row.head{padding:8px 4px;border-bottom:2px solid var(--divider-color)}
     .row.head span{font-size:calc(.64rem * var(--fio-font-scale, 1.32));font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--secondary-text-color)}
     .row:last-child{border-bottom:0}
     .c-name{display:flex;align-items:center;gap:12px;min-width:0}
-    .icon-plate{display:inline-flex;align-items:center;justify-content:center;flex:0 0 40px;width:40px;height:40px;border-radius:12px;color:var(--secondary-text-color);background:color-mix(in srgb,var(--secondary-text-color) 12%,var(--fio-surface))}
+    .icon-plate{display:inline-flex;align-items:center;justify-content:center;flex:0 0 40px;width:40px;height:40px;border-radius:50%;color:var(--secondary-text-color);background:color-mix(in srgb,var(--secondary-text-color) 12%,var(--fio-surface))}
     .icon-plate[data-tone=active]{color:var(--error-color);background:color-mix(in srgb,var(--error-color) 16%,var(--fio-surface))}
-    .icon-plate ha-icon{--mdc-icon-size:22px}
-    .name-button{min-width:0;padding:0;border:0;background:none;text-align:left;font:inherit;font-weight:600;font-size:calc(.9rem * var(--fio-font-scale, 1.32));line-height:1.25;color:var(--primary-text-color);overflow-wrap:anywhere;cursor:pointer}
+    .icon-plate ha-icon{--mdc-icon-size:24px}
+    .name-button{min-width:0;padding:0;border:0;background:none;text-align:left;font-family:inherit;font-size:var(--ha-font-size-m, .92rem);font-weight:500;line-height:1.25;color:var(--primary-text-color);overflow-wrap:anywhere;cursor:pointer}
     .name-button:disabled{cursor:default;color:var(--secondary-text-color)}
-    .c-trigger{font-size:calc(.82rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color);font-variant-numeric:tabular-nums}
-    .pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:8px;font-size:calc(.72rem * var(--fio-font-scale, 1.32));font-weight:600;white-space:nowrap;background:var(--secondary-background-color);color:var(--secondary-text-color)}
+    .c-trigger{font-size:var(--ha-font-size-s, .8rem);color:var(--secondary-text-color);font-variant-numeric:tabular-nums}
+    .pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:8px;font-size:var(--ha-font-size-s, .8rem);font-weight:600;white-space:nowrap;background:var(--secondary-background-color);color:var(--secondary-text-color)}
     .pill[data-tone=active]{background:color-mix(in srgb,var(--error-color) 14%,var(--fio-surface));color:var(--error-color)}
     .pill[data-tone=inactive]{background:color-mix(in srgb,var(--fio-success) 14%,var(--fio-surface));color:var(--fio-success)}
     .c-action{display:flex;justify-content:flex-end}
-    .auto{font-size:calc(.82rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
-    ha-button.ack{--ha-button-height:40px;--ha-button-border-radius:11px;--wa-color-on-loud:var(--primary-color);font-size:calc(.8rem * var(--fio-font-scale, 1.32))}
+    .auto{font-size:var(--ha-font-size-s, .8rem);color:var(--secondary-text-color)}
+    ha-button.ack{--ha-button-height:40px;--ha-button-border-radius:11px;--wa-color-on-normal:var(--secondary-text-color);box-sizing:border-box;min-width:40px;border:1px solid var(--divider-color);border-radius:11px}
+    ha-button.ack::part(base){width:40px;padding:0;border-radius:11px}
+    ha-button.ack:not([disabled]):hover{--wa-color-on-normal:var(--primary-color);border-color:var(--primary-color)}
     ha-button.ack[disabled]{opacity:.55}
+    ha-button.ack ha-icon{--mdc-icon-size:20px}
     .empty{margin:0;font-size:calc(.82rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
     .error{margin:0 0 10px;font-size:calc(.78rem * var(--fio-font-scale, 1.32));color:var(--error-color)}
-    @container(max-width:560px){.table{min-width:600px}.row{grid-template-columns:minmax(150px,2fr) minmax(90px,1fr) minmax(90px,1fr) minmax(90px,1fr) 150px;gap:8px}.icon-plate{flex-basis:34px;width:34px;height:34px;border-radius:10px}}
+    @container(max-width:560px){.table{min-width:600px}.row{grid-template-columns:minmax(150px,2fr) minmax(90px,1fr) minmax(90px,1fr) minmax(90px,1fr) 52px;gap:8px}.icon-plate{flex-basis:34px;width:34px;height:34px}}
     @media (prefers-reduced-motion: reduce){*{transition:none!important}}
   `;
 }

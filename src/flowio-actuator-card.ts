@@ -91,7 +91,7 @@ class FlowioActuatorCard extends LitElement {
         return html`<span class=c-time data-empty=${empty ? 'true' : 'false'} data-period=${period}>${formatRuntime(seconds)}</span>`;
       })}
       <span class=c-actions>
-        ${canReset ? html`<ha-button class=reset appearance=plain title=${`Remettre à zéro les durées de ${name}`} .disabled=${this.busy === reset} .accessibleLabel=${`Remettre à zéro les durées de ${name}`} @click=${() => this.press(reset!, `Remettre à zéro les durées de ${name} ?`)}><ha-icon slot=start icon=mdi:restart aria-hidden=true></ha-icon></ha-button>` : nothing}
+        ${canReset ? html`<ha-button class=reset appearance=plain title=${`Remettre à zéro les durées de ${name}`} .disabled=${this.busy === reset} .accessibleLabel=${`Remettre à zéro les durées de ${name}`} @click=${() => this.press(reset!, `Remettre à zéro les durées de ${name} ?`)}><ha-icon slot=start icon=mdi:refresh aria-hidden=true></ha-icon></ha-button>` : nothing}
       </span>
     </div>`;
   }
@@ -112,7 +112,7 @@ class FlowioActuatorCard extends LitElement {
         </div>
         <div class=head-side>
           ${total ? html`<span class=count><span class=count-dot data-on=${active > 0 ? 'true' : 'false'} aria-hidden=true></span>${active} actif(s) / ${total}</span>` : nothing}
-          ${canResetAll ? html`<ha-button class=reset-all appearance=outlined .disabled=${!!this.busy} .accessibleLabel=${'Remettre à zéro toutes les durées'} @click=${() => this.press(globalReset, 'Remettre à zéro les compteurs de tous les équipements ?')}><ha-icon slot=start icon=mdi:restart aria-hidden=true></ha-icon>Tout remettre à zéro</ha-button>` : nothing}
+          ${canResetAll ? html`<ha-button class=reset-all appearance=outlined .disabled=${!!this.busy} .accessibleLabel=${'Remettre à zéro toutes les durées'} @click=${() => this.press(globalReset, 'Remettre à zéro les compteurs de tous les équipements ?')}><ha-icon slot=start icon=mdi:refresh aria-hidden=true></ha-icon>Tout remettre à zéro</ha-button>` : nothing}
         </div>
       </header>
       ${this.error ? html`<p class=error role=alert>${this.error}</p>` : nothing}
@@ -147,17 +147,17 @@ class FlowioActuatorCard extends LitElement {
     .row.head .c-name,.row.head .c-time,.row.head .c-actions{font-size:calc(.64rem * var(--fio-font-scale, 1.32));font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--secondary-text-color)}
     .row:last-child{border-bottom:0}
     .c-name{display:flex;align-items:center;gap:12px;min-width:0}
-    .icon-plate{display:inline-flex;align-items:center;justify-content:center;flex:0 0 40px;width:40px;height:40px;border-radius:12px;color:var(--secondary-text-color);background:color-mix(in srgb,var(--secondary-text-color) 12%,var(--fio-surface))}
+    .icon-plate{display:inline-flex;align-items:center;justify-content:center;flex:0 0 40px;width:40px;height:40px;border-radius:50%;color:var(--secondary-text-color);background:color-mix(in srgb,var(--secondary-text-color) 12%,var(--fio-surface))}
     .icon-plate[data-on=true]{color:var(--fio-accent);background:color-mix(in srgb,var(--fio-accent) 18%,var(--fio-surface))}
     .icon-plate[data-tone=water]{--fio-accent:var(--fio-water)}
     .icon-plate[data-tone=air]{--fio-accent:var(--fio-air)}
     .icon-plate[data-tone=ph]{--fio-accent:var(--fio-ph)}
     .icon-plate[data-tone=orp]{--fio-accent:var(--fio-orp)}
     .icon-plate[data-tone=pressure]{--fio-accent:var(--fio-pressure)}
-    .icon-plate ha-icon{--mdc-icon-size:22px}
-    .name-button{min-width:0;padding:0;border:0;background:none;text-align:left;font:inherit;font-weight:600;font-size:calc(.9rem * var(--fio-font-scale, 1.32));line-height:1.25;color:var(--primary-text-color);overflow-wrap:anywhere;cursor:pointer}
+    .icon-plate ha-icon{--mdc-icon-size:24px}
+    .name-button{min-width:0;padding:0;border:0;background:none;text-align:left;font-family:inherit;font-size:var(--ha-font-size-m, .92rem);font-weight:500;line-height:1.25;color:var(--primary-text-color);overflow-wrap:anywhere;cursor:pointer}
     .name-button:disabled{cursor:default;color:var(--secondary-text-color)}
-    .c-time{font-size:calc(.95rem * var(--fio-font-scale, 1.32));font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap;color:var(--primary-text-color)}
+    .c-time{font-size:var(--ha-font-size-m, .92rem);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap;color:var(--primary-text-color)}
     .c-time[data-empty=true]{color:color-mix(in srgb,var(--secondary-text-color) 55%,var(--fio-surface));font-weight:400}
     .c-actions{display:flex;justify-content:flex-end}
     ha-button.reset{--ha-button-height:40px;--ha-button-border-radius:11px;--wa-color-on-normal:var(--secondary-text-color);box-sizing:border-box;min-width:40px;border:1px solid var(--divider-color);border-radius:11px}
@@ -166,7 +166,7 @@ class FlowioActuatorCard extends LitElement {
     ha-button.reset ha-icon{--mdc-icon-size:20px}
     .empty{margin:0;font-size:calc(.82rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
     .error{margin:0 0 10px;font-size:calc(.78rem * var(--fio-font-scale, 1.32));color:var(--error-color)}
-    @container(max-width:520px){.table{min-width:520px}.row{grid-template-columns:minmax(120px,1.4fr) repeat(4,minmax(66px,1fr)) 44px;gap:8px}.icon-plate{flex-basis:34px;width:34px;height:34px;border-radius:10px}}
+    @container(max-width:520px){.table{min-width:520px}.row{grid-template-columns:minmax(120px,1.4fr) repeat(4,minmax(66px,1fr)) 44px;gap:8px}.icon-plate{flex-basis:34px;width:34px;height:34px}}
     @media (prefers-reduced-motion: reduce){*{transition:none!important}}
   `;
 }

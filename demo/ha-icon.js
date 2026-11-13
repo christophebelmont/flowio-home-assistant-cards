@@ -17,6 +17,7 @@ const FLOWIO_ICONS = {
   'radiator': '♨️',
   'lightbulb-outline': '💡',
   'restart': '↺',
+  'refresh': '↻',
   'check': '✓',
   'bell-outline': '🔔',
   'bell-alert': '🔔',

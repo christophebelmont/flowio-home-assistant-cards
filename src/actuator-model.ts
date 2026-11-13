@@ -32,10 +32,10 @@ export const RUNTIME_LABELS: Record<RuntimePeriod, string> = {
 };
 
 const DEFAULT_RUNTIME_KEYS: ActuatorRuntimeKeys = {
-  day: 'runtime_day',
-  week: 'runtime_week',
-  month: 'runtime_month',
-  total: 'runtime_total'
+  day: 'uptime_day_s',
+  week: 'uptime_week_s',
+  month: 'uptime_month_s',
+  total: 'uptime_total_s'
 };
 
 const RESET_OPERATIONS: Partial<Record<Role, Operation>> = {
