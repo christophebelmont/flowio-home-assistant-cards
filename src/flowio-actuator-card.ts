@@ -15,7 +15,7 @@ import {
   normalizeActuatorConfig,
   RUNTIME_LABELS,
   RUNTIME_PERIODS,
-  runtimeSeconds,
+  runtimeSecondsFor,
   type ActuatorConfig
 } from './actuator-model';
 
@@ -86,7 +86,7 @@ class FlowioActuatorCard extends LitElement {
         <button type=button class=name-button ?disabled=${!state} @click=${() => this.more(id)}>${name}</button>
       </div>
       ${RUNTIME_PERIODS.map(period => {
-        const seconds = runtimeSeconds(state, config.runtime_keys[period]);
+        const seconds = runtimeSecondsFor(state, config, period);
         const empty = seconds === undefined || seconds === 0;
         return html`<span class=c-time data-empty=${empty ? 'true' : 'false'} data-period=${period}>${formatRuntime(seconds)}</span>`;
       })}

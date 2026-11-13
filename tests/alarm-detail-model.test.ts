@@ -39,9 +39,9 @@ it('détecte les alarmes du préfixe et construit les identifiants', () => {
 });
 
 it('détermine le latch d’une alarme', () => {
+  expect(alarmLatched(state('off', { latch_enabled: true }))).toBe(true);
+  expect(alarmLatched(state('off', { latch_enabled: false }))).toBe(false);
   expect(alarmLatched(state('off', { latch: true }))).toBe(true);
-  expect(alarmLatched(state('off', { latch: false }))).toBe(false);
-  expect(alarmLatched(state('off', { latch: 'libre' }))).toBe(true);
   expect(alarmLatched(state('off', { latch: 'non_utilise' }))).toBe(false);
   expect(alarmLatched(state('off'))).toBe(true);
   expect(alarmLatched(undefined)).toBe(true);
@@ -49,8 +49,8 @@ it('détermine le latch d’une alarme', () => {
 
 it('construit le détail et compte les alarmes à acquitter', () => {
   const h = hass({
-    'binary_sensor.fio_alm_1_active': state('on', { friendly_name: 'Pression basse', latch: true }),
-    'binary_sensor.fio_alm_2_active': state('off', { friendly_name: 'Niveau bas', latch: false }),
+    'binary_sensor.fio_alm_1_active': state('off', { friendly_name: 'Pression basse', condition: 'true', latch_enabled: true, resettable: true }),
+    'binary_sensor.fio_alm_2_active': state('off', { friendly_name: 'Niveau bas', condition: 'false', latch_enabled: false, resettable: false }),
     'button.fio_alm_1_reset': state('unknown'),
     'button.fio_alm_2_reset': state('unavailable')
   });
@@ -67,6 +67,8 @@ it('formate le déclenchement et la condition', () => {
   expect(formatTrigger(Date.parse('2026-10-29T12:00:00Z'))).toMatch(/^\d{2}\/\d{2} \d{2}:\d{2}$/);
   expect(alarmConditionLabel(state('on')).tone).toBe('active');
   expect(alarmConditionLabel(state('off'))).toEqual({ label: 'Inactive', tone: 'inactive' });
+  expect(alarmConditionLabel(state('off', { condition: 'true' })).tone).toBe('active');
+  expect(alarmConditionLabel(state('off', { condition: 'false' })).tone).toBe('inactive');
   expect(alarmConditionLabel(state('unavailable')).tone).toBe('unknown');
   expect(alarmConditionLabel(undefined).tone).toBe('unknown');
 });

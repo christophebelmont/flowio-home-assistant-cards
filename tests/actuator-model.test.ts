@@ -6,7 +6,8 @@ import {
   actuatorRole,
   formatRuntime,
   normalizeActuatorConfig,
-  runtimeSeconds
+  runtimeSeconds,
+  runtimeSecondsFor
 } from '../src/actuator-model';
 import type { Hass } from '../src/model';
 
@@ -63,6 +64,17 @@ it('lit et formate les durées de fonctionnement', () => {
   expect(formatRuntime(59)).toBe('00:00:59');
   expect(formatRuntime(1184)).toBe('00:19:44');
   expect(formatRuntime(1168368)).toBe('324:32:48');
+});
+
+it('tolère les anciens noms de clés de durée', () => {
+  const s = state({ uptime_day_s: 2948, uptime_week_s: 2948, uptime_month_s: 2948, uptime_total_s: 1170133 });
+  expect(runtimeSecondsFor(s, normalizeActuatorConfig({}), 'day')).toBe(2948);
+  expect(runtimeSecondsFor(s, normalizeActuatorConfig({}), 'total')).toBe(1170133);
+  const legacy = normalizeActuatorConfig({ runtime_keys: { day: 'runtime_day', week: 'runtime_week', month: 'runtime_month', total: 'runtime_total' } });
+  expect(runtimeSecondsFor(s, legacy, 'day')).toBe(2948);
+  expect(runtimeSecondsFor(s, legacy, 'week')).toBe(2948);
+  expect(runtimeSecondsFor(s, legacy, 'month')).toBe(2948);
+  expect(runtimeSecondsFor(s, legacy, 'total')).toBe(1170133);
 });
 
 it('compte les actionneurs actifs', () => {

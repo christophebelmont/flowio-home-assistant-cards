@@ -4,6 +4,7 @@ import { ensureHaElements } from './ha-controls';
 import { type Hass } from './model';
 import { displayName, entityName } from './names';
 import { mergeOrder, orderItems } from './order-list';
+import { stateIcon } from './state-history-model';
 import {
   alarmConditionLabel,
   alarmDetailEntries,
@@ -66,10 +67,11 @@ class FlowioAlarmDetailCard extends LitElement {
     const state = this.hass?.states[entry.entityId];
     const condition = alarmConditionLabel(state);
     const name = displayName(entry.name, prefix);
-    const canAck = entry.latched && entry.canReset && entry.active;
+    const icon = stateIcon(entry.entityId, state);
+    const canAck = entry.latched && entry.canReset;
     return html`<div class=row data-alarm=${entry.id} data-active=${entry.active ? 'true' : 'false'}>
       <div class=c-name>
-        <span class=icon-plate data-tone=${condition.tone}><ha-icon icon=mdi:bell-outline aria-hidden=true></ha-icon></span>
+        <span class=icon-plate data-tone=${condition.tone}><ha-icon .icon=${icon} aria-hidden=true></ha-icon></span>
         <button type=button class=name-button ?disabled=${!entry.present} @click=${() => this.more(entry.entityId)}>${name}</button>
       </div>
       <span class=c-trigger>${formatTrigger(entry.triggeredAt)}</span>

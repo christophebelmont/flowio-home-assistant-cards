@@ -22,6 +22,17 @@ test('carte équipements du bassin : durées par actionneur et sans interrupteur
   await expect(first.locator('.icon-plate')).toHaveAttribute('data-on', 'true');
 });
 
+test('carte équipements du bassin : clés de durée historiques tolérées', async ({ page }) => {
+  await page.goto('/demo/cards.html');
+  const card = page.locator('flowio-actuator-card');
+  await expect(card.locator('.table')).toBeVisible();
+  await page.evaluate(() => {
+    const el = document.querySelector('flowio-actuator-card') as any;
+    el.setConfig({ entity_prefix: 'fio', entities: ['switch.fio_io_flt_pmp'], runtime_keys: { day: 'runtime_day', week: 'runtime_week', month: 'runtime_month', total: 'runtime_total' } });
+  });
+  await expect(card.locator('.row:not(.head) .c-time').nth(3)).toHaveText('324:32:48');
+});
+
 test('carte équipements du bassin : remise à zéro par ligne et globale', async ({ page }) => {
   await page.goto('/demo/cards.html');
   const card = page.locator('flowio-actuator-card');

@@ -38,6 +38,13 @@ const DEFAULT_RUNTIME_KEYS: ActuatorRuntimeKeys = {
   total: 'uptime_total_s'
 };
 
+const RUNTIME_FALLBACKS: Record<RuntimePeriod, string[]> = {
+  day: ['uptime_day_s', 'runtime_day', 'upt_day', 'day'],
+  week: ['uptime_week_s', 'runtime_week', 'upt_week', 'week'],
+  month: ['uptime_month_s', 'runtime_month', 'upt_month', 'month'],
+  total: ['uptime_total_s', 'runtime_total', 'upt_total', 'total']
+};
+
 const RESET_OPERATIONS: Partial<Record<Role, Operation>> = {
   filtration: 'reset_filtration',
   ph_pump: 'reset_ph',
@@ -118,6 +125,15 @@ export function runtimeSeconds(state: EntityState | undefined, key: string): num
   const value = state?.attributes[key];
   if (typeof value === 'number' && Number.isFinite(value) && value >= 0) return value;
   if (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value)) && Number(value) >= 0) return Number(value);
+  return undefined;
+}
+
+export function runtimeSecondsFor(state: EntityState | undefined, config: ActuatorConfig, period: RuntimePeriod): number | undefined {
+  const keys = [...new Set([config.runtime_keys[period], ...RUNTIME_FALLBACKS[period]])];
+  for (const key of keys) {
+    const value = runtimeSeconds(state, key);
+    if (value !== undefined) return value;
+  }
   return undefined;
 }
 

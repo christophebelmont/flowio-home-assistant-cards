@@ -21,6 +21,8 @@ const FLOWIO_ICONS = {
   'check': '✓',
   'bell-outline': '🔔',
   'bell-alert': '🔔',
+  'alarm-light': '🚨',
+  'pool': '🏊',
   'shield-alert-outline': '🛡️',
   'alert-outline': '⚠️',
   'checkbox-marked-circle-outline': '☑️',

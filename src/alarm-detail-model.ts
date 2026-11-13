@@ -75,7 +75,25 @@ export function alarmResetEntity(prefix: string, entityId: string): string {
   return `button.${alarmStem(prefix)}alm_${alarmId(entityId)}_reset`;
 }
 
+function booleanAttr(value: unknown): boolean | undefined {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const key = value.trim().toLowerCase();
+    if (['true', 'on', '1', 'yes'].includes(key)) return true;
+    if (['false', 'off', '0', 'no'].includes(key)) return false;
+  }
+  return undefined;
+}
+
+export function alarmCondition(state: EntityState | undefined): boolean {
+  const condition = booleanAttr(state?.attributes.condition);
+  if (condition !== undefined) return condition;
+  return state?.state === 'on';
+}
+
 export function alarmLatched(state: EntityState | undefined): boolean {
+  const enabled = booleanAttr(state?.attributes.latch_enabled);
+  if (enabled !== undefined) return enabled;
   const value = state?.attributes.latch;
   if (typeof value === 'boolean') return value;
   if (typeof value === 'string') {
@@ -84,6 +102,10 @@ export function alarmLatched(state: EntityState | undefined): boolean {
     if (AUTO_VALUES.includes(key)) return false;
   }
   return true;
+}
+
+export function alarmResettable(state: EntityState | undefined): boolean | undefined {
+  return booleanAttr(state?.attributes.resettable);
 }
 
 export function alarmTriggeredAt(state: EntityState | undefined): number | undefined {
@@ -105,6 +127,7 @@ export function alarmDetailEntries(hass: Hass | undefined, config: AlarmDetailCo
     const state = hass?.states[entityId];
     const resetEntity = alarmResetEntity(prefix, entityId);
     const resetState = hass?.states[resetEntity];
+    const resettable = alarmResettable(state);
     const name = typeof state?.attributes.friendly_name === 'string' && state.attributes.friendly_name
       ? state.attributes.friendly_name
       : `Alarme ${alarmId(entityId)}`;
@@ -113,17 +136,17 @@ export function alarmDetailEntries(hass: Hass | undefined, config: AlarmDetailCo
       entityId,
       resetEntity,
       name,
-      active: state?.state === 'on',
+      active: alarmCondition(state),
       present: !!state,
       triggeredAt: alarmTriggeredAt(state),
       latched: alarmLatched(state),
-      canReset: !!resetState && !['unavailable', ''].includes(resetState.state)
+      canReset: resettable ?? (!!resetState && !['unavailable', ''].includes(resetState.state))
     };
   });
 }
 
 export function alarmPendingCount(entries: readonly AlarmDetail[]): number {
-  return entries.filter(entry => entry.active && entry.latched && entry.canReset).length;
+  return entries.filter(entry => entry.latched && entry.canReset).length;
 }
 
 export function formatTrigger(ms: number | undefined): string {
@@ -139,7 +162,7 @@ export function formatTrigger(ms: number | undefined): string {
 export function alarmConditionLabel(state: EntityState | undefined): { label: string; tone: 'active' | 'inactive' | 'unknown' } {
   if (!state) return { label: 'Absente', tone: 'unknown' };
   if (!available(state)) return { label: 'Indisponible', tone: 'unknown' };
-  return state.state === 'on' ? { label: 'Active', tone: 'active' } : { label: 'Inactive', tone: 'inactive' };
+  return alarmCondition(state) ? { label: 'Active', tone: 'active' } : { label: 'Inactive', tone: 'inactive' };
 }
 
 export function alarmNamePrefix(config: AlarmDetailConfig, hass: Hass | undefined, ids: readonly string[]): string {
