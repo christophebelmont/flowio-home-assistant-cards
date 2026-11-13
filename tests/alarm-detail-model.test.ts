@@ -57,8 +57,8 @@ it('construit le détail et compte les alarmes à acquitter', () => {
   const config = normalizeAlarmDetailConfig({ alarms: ['binary_sensor.fio_alm_1_active', 'binary_sensor.fio_alm_2_active'] });
   const entries = alarmDetailEntries(h, config);
   expect(entries.map(entry => entry.name)).toEqual(['Pression basse', 'Niveau bas']);
-  expect(entries[0]).toMatchObject({ id: '1', active: true, latched: true, canReset: true });
-  expect(entries[1]).toMatchObject({ id: '2', active: false, latched: false, canReset: false });
+  expect(entries[0]).toMatchObject({ id: '1', active: false, condition: true, latched: true, canReset: true });
+  expect(entries[1]).toMatchObject({ id: '2', active: false, condition: false, latched: false, canReset: false });
   expect(alarmPendingCount(entries)).toBe(1);
 });
 
@@ -69,6 +69,7 @@ it('formate le déclenchement et la condition', () => {
   expect(alarmConditionLabel(state('off'))).toEqual({ label: 'Inactive', tone: 'inactive' });
   expect(alarmConditionLabel(state('off', { condition: 'true' })).tone).toBe('active');
   expect(alarmConditionLabel(state('off', { condition: 'false' })).tone).toBe('inactive');
+  expect(alarmConditionLabel(state('on', { condition: 'false' }))).toEqual({ label: 'Inactive', tone: 'latched' });
   expect(alarmConditionLabel(state('unavailable')).tone).toBe('unknown');
   expect(alarmConditionLabel(undefined).tone).toBe('unknown');
 });

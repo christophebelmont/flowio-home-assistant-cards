@@ -17,6 +17,7 @@ export interface AlarmDetail {
   resetEntity: string;
   name: string;
   active: boolean;
+  condition: boolean;
   present: boolean;
   triggeredAt?: number;
   latched: boolean;
@@ -136,7 +137,8 @@ export function alarmDetailEntries(hass: Hass | undefined, config: AlarmDetailCo
       entityId,
       resetEntity,
       name,
-      active: alarmCondition(state),
+      active: state?.state === 'on',
+      condition: alarmCondition(state),
       present: !!state,
       triggeredAt: alarmTriggeredAt(state),
       latched: alarmLatched(state),
@@ -159,10 +161,12 @@ export function formatTrigger(ms: number | undefined): string {
   }
 }
 
-export function alarmConditionLabel(state: EntityState | undefined): { label: string; tone: 'active' | 'inactive' | 'unknown' } {
+export function alarmConditionLabel(state: EntityState | undefined): { label: string; tone: 'active' | 'latched' | 'inactive' | 'unknown' } {
   if (!state) return { label: 'Absente', tone: 'unknown' };
   if (!available(state)) return { label: 'Indisponible', tone: 'unknown' };
-  return alarmCondition(state) ? { label: 'Active', tone: 'active' } : { label: 'Inactive', tone: 'inactive' };
+  const condition = alarmCondition(state);
+  const active = state.state === 'on';
+  return { label: condition ? 'Active' : 'Inactive', tone: condition ? 'active' : active ? 'latched' : 'inactive' };
 }
 
 export function alarmNamePrefix(config: AlarmDetailConfig, hass: Hass | undefined, ids: readonly string[]): string {

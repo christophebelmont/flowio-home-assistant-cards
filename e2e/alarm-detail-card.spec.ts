@@ -9,10 +9,10 @@ test('carte gestion des alarmes : détail, condition, latch et acquittement', as
   await expect(rows.first().locator('.name-button')).toHaveText('Low pressure');
   await expect(rows.nth(3).locator('.name-button')).toHaveText('Chlorine tank low');
   await expect(rows.first().locator('.pill[data-tone=inactive]')).toHaveText('Inactive');
-  await expect(rows.first().locator('.pill[data-latch=true]')).toHaveText('Libre');
-  await expect(rows.nth(2).locator('.pill[data-latch=false]')).toHaveText('Non utilisé');
   await expect(rows.first().locator('.c-action ha-button.ack')).toHaveCount(1);
-  await expect(rows.nth(2).locator('.auto')).toHaveText('Automatique');
+  await expect(rows.nth(2).locator('.c-action ha-button.ack')).toHaveCount(0);
+  await expect(rows.nth(2).locator('.c-action')).toBeEmpty();
+  await expect(card.locator('.c-latch')).toHaveCount(0);
   await expect(card.locator('ha-switch')).toHaveCount(0);
 });
 

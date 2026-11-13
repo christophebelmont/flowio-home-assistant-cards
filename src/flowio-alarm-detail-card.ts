@@ -65,22 +65,21 @@ class FlowioAlarmDetailCard extends LitElement {
 
   private row(entry: AlarmDetail, prefix: string) {
     const state = this.hass?.states[entry.entityId];
-    const condition = alarmConditionLabel(state);
+    const badge = alarmConditionLabel(state);
     const name = displayName(entry.name, prefix);
     const icon = stateIcon(entry.entityId, state);
     const canAck = entry.latched && entry.canReset;
     return html`<div class=row data-alarm=${entry.id} data-active=${entry.active ? 'true' : 'false'}>
       <div class=c-name>
-        <span class=icon-plate data-tone=${condition.tone}><ha-icon .icon=${icon} aria-hidden=true></ha-icon></span>
+        <span class=icon-plate data-tone=${entry.active ? 'active' : 'neutral'}><ha-icon .icon=${icon} aria-hidden=true></ha-icon></span>
         <button type=button class=name-button ?disabled=${!entry.present} @click=${() => this.more(entry.entityId)}>${name}</button>
       </div>
       <span class=c-trigger>${formatTrigger(entry.triggeredAt)}</span>
-      <span class=c-condition><span class="pill" data-tone=${condition.tone}>${condition.label}</span></span>
-      <span class=c-latch><span class="pill" data-latch=${entry.latched ? 'true' : 'false'}>${entry.latched ? 'Libre' : 'Non utilisé'}</span></span>
+      <span class=c-condition><span class="pill" data-tone=${badge.tone}>${badge.label}</span></span>
       <span class=c-action>
         ${entry.latched
           ? html`<ha-button class=ack appearance=plain title=${`Acquitter ${name}`} .disabled=${!canAck || !!this.busy} .accessibleLabel=${`Acquitter ${name}`} @click=${() => this.press([entry], `Acquitter « ${name} » ? Le firmware vérifiera que la cause a disparu.`)}><ha-icon slot=start icon=mdi:refresh aria-hidden=true></ha-icon></ha-button>`
-          : html`<span class=auto>Automatique</span>`}
+          : nothing}
       </span>
     </div>`;
   }
@@ -106,7 +105,6 @@ class FlowioAlarmDetailCard extends LitElement {
           <span class=c-name>Alarme</span>
           <span class=c-trigger>Déclenchement</span>
           <span class=c-condition>Condition</span>
-          <span class=c-latch>Latch</span>
           <span class=c-action>Action</span>
         </div>
         ${entries.map(entry => this.row(entry, prefix))}
@@ -115,7 +113,7 @@ class FlowioAlarmDetailCard extends LitElement {
   }
 
   static styles = css`
-    :host{display:block;container-type:inline-size;color:var(--primary-text-color);font-family:var(--ha-font-family-body,inherit);--fio-surface:var(--ha-card-background,var(--card-background-color));--fio-success:var(--success-color,#2e7d32)}
+    :host{display:block;container-type:inline-size;color:var(--primary-text-color);font-family:var(--ha-font-family-body,inherit);--fio-surface:var(--ha-card-background,var(--card-background-color));--fio-success:var(--success-color,#2e7d32);--fio-warning:var(--warning-color,#fb8c00)}
     ha-card{overflow:hidden}
     .body{padding:16px}
     .head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:0 0 14px}
@@ -126,19 +124,20 @@ class FlowioAlarmDetailCard extends LitElement {
     ha-button.ack-all{--ha-button-height:42px;--ha-button-border-radius:12px;--wa-color-on-normal:var(--fio-success);font-size:calc(.78rem * var(--fio-font-scale, 1.32))}
     .table-scroll{overflow-x:auto;margin:0 -4px}
     .table{display:flex;flex-direction:column;min-width:720px}
-    .row{display:grid;grid-template-columns:minmax(200px,2fr) minmax(110px,1fr) minmax(100px,1fr) minmax(110px,1fr) 56px;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--divider-color)}
+    .row{display:grid;grid-template-columns:minmax(200px,2fr) minmax(110px,1fr) minmax(100px,1fr) 56px;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--divider-color)}
     .row.head{padding:8px 4px;border-bottom:2px solid var(--divider-color)}
     .row.head span{font-size:calc(.64rem * var(--fio-font-scale, 1.32));font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--secondary-text-color)}
     .row:last-child{border-bottom:0}
     .c-name{display:flex;align-items:center;gap:12px;min-width:0}
     .icon-plate{display:inline-flex;align-items:center;justify-content:center;flex:0 0 40px;width:40px;height:40px;border-radius:50%;color:var(--secondary-text-color);background:color-mix(in srgb,var(--secondary-text-color) 12%,var(--fio-surface))}
-    .icon-plate[data-tone=active]{color:var(--error-color);background:color-mix(in srgb,var(--error-color) 16%,var(--fio-surface))}
+    .icon-plate[data-tone=active]{color:#fff;background:var(--error-color)}
     .icon-plate ha-icon{--mdc-icon-size:24px}
     .name-button{min-width:0;padding:0;border:0;background:none;text-align:left;font-family:inherit;font-size:var(--ha-font-size-m, .92rem);font-weight:500;line-height:1.25;color:var(--primary-text-color);overflow-wrap:anywhere;cursor:pointer}
     .name-button:disabled{cursor:default;color:var(--secondary-text-color)}
     .c-trigger{font-size:var(--ha-font-size-s, .8rem);color:var(--secondary-text-color);font-variant-numeric:tabular-nums}
     .pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:8px;font-size:var(--ha-font-size-s, .8rem);font-weight:600;white-space:nowrap;background:var(--secondary-background-color);color:var(--secondary-text-color)}
     .pill[data-tone=active]{background:color-mix(in srgb,var(--error-color) 14%,var(--fio-surface));color:var(--error-color)}
+    .pill[data-tone=latched]{background:color-mix(in srgb,var(--fio-warning) 16%,var(--fio-surface));color:var(--fio-warning)}
     .pill[data-tone=inactive]{background:color-mix(in srgb,var(--fio-success) 14%,var(--fio-surface));color:var(--fio-success)}
     .c-action{display:flex;justify-content:flex-end}
     .auto{font-size:var(--ha-font-size-s, .8rem);color:var(--secondary-text-color)}
@@ -149,7 +148,7 @@ class FlowioAlarmDetailCard extends LitElement {
     ha-button.ack ha-icon{--mdc-icon-size:20px}
     .empty{margin:0;font-size:calc(.82rem * var(--fio-font-scale, 1.32));color:var(--secondary-text-color)}
     .error{margin:0 0 10px;font-size:calc(.78rem * var(--fio-font-scale, 1.32));color:var(--error-color)}
-    @container(max-width:560px){.table{min-width:600px}.row{grid-template-columns:minmax(150px,2fr) minmax(90px,1fr) minmax(90px,1fr) minmax(90px,1fr) 52px;gap:8px}.icon-plate{flex-basis:34px;width:34px;height:34px}}
+    @container(max-width:560px){.table{min-width:520px}.row{grid-template-columns:minmax(150px,2fr) minmax(90px,1fr) minmax(90px,1fr) 52px;gap:8px}.icon-plate{flex-basis:34px;width:34px;height:34px}}
     @media (prefers-reduced-motion: reduce){*{transition:none!important}}
   `;
 }
